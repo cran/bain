@@ -1,6 +1,6 @@
-5d2e7895bf654f09dcb99f7d58a91e8e *DESCRIPTION
+fb079a0f35b041da6969d5bccfac3f84 *DESCRIPTION
 9732609cc6ab99a7089f5fe2a2edde7f *NAMESPACE
-2fd9608832aaf2cd15b672a52d520ad2 *NEWS.md
+248c68300caa5be968af77ed23605f53 *NEWS.md
 a03d3fe6f8c3b806de12df40cb17c646 *R/Bain.print.R
 81051bcc2cf1bedf378224b0a93e2877 *R/bain-package.R
 940a8d506ee1095b0aec1682d39f378c *R/bain_methods.R
@@ -17,7 +17,7 @@ a6cb11669c26e1dd818e4ffd73ff82ba *build/vignette.rds
 2869017ad15a4e3e92cc6f4a99bad191 *data/sesamesim.rda
 5e0100c58a7d5eca50a68a30678b801e *inst/doc/Introduction_to_bain.R
 351e7e3c7864b9aab48578d3649aceae *inst/doc/Introduction_to_bain.Rmd
-2c63fc60738ab0b97ec139af1db5506b *inst/doc/Introduction_to_bain.html
+7905dd4a2843926852308224f194e728 *inst/doc/Introduction_to_bain.html
 e772d2211be32300d92a946571e79e63 *man/bain.Rd
 5ab27cd6ede79034c5272bac8bc0412e *man/constraint_to_equation.Rd
 7a11dec5f540e93653a3c186cef6b855 *man/constraint_to_row.Rd
@@ -31,7 +31,7 @@ be3bac35e567eaa067c00da028485573 *man/order_terms.Rd
 dcb278ac251106dde4a6ca1cc5ea70e0 *man/seBeta.Rd
 129431bbb436de067547433f2b2faeb9 *man/sesamesim.Rd
 a05f96ec8399e490a040d18b208cd2e4 *man/t_test.Rd
-6081f5f38bfb2085c9567ddcd3b38b92 *src/Bain.f90
+09ec1b6064b12639859276cd3f350800 *src/Bain.f90
 f08557aba428912b38c7c9565d9b0d11 *src/bain_init.c
 6fcdf2cd19ec7d6eb9ada8f78c25f112 *tests/testthat.R
 99053d2d04d48365add228275c8d453e *tests/testthat/test-ancova.R
