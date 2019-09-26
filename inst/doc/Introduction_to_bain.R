@@ -159,7 +159,7 @@ knitr::opts_chunk$set(
 #  coef(regr)
 #  # set a seed value
 #  set.seed(100)
-#  # test hypotheses with bain. Note that standardized = FALSE denotes that the
+#  # test hypotheses with bain. Note that standardize = FALSE denotes that the
 #  # hypotheses are in terms of unstandardized regression coefficients
 #  results<-bain(regr, "age = 0 & peab=0 & pre=0 ; age > 0 & peab > 0 & pre > 0"
 #  , standardize = FALSE)
@@ -172,7 +172,7 @@ knitr::opts_chunk$set(
 #  # coefficients (based on the seBeta function by Jeff Jones and Niels Waller):
 #  # set a seed value
 #  set.seed(100)
-#  # test hypotheses with bain. Note that standardized = TRUE denotes that the
+#  # test hypotheses with bain. Note that standardize = TRUE denotes that the
 #  # hypotheses are in terms of standardized regression coefficients
 #  results<-bain(regr, "age = peab = pre ; pre > age > peab",standardize = TRUE)
 #  # display the results
@@ -181,6 +181,297 @@ knitr::opts_chunk$set(
 #  summary(results, ci = 0.95)
 
 ## ----ttest_ex9, eval=FALSE-----------------------------------------------
+#  # load the bain package which includes the simulated sesamesim data set
+#  library(bain)
+#  # make a factor of variable site
+#  sesamesim$site <- as.factor(sesamesim$site)
+#  # execute an analysis of variance using lm() which, due to the -1, returns
+#  # estimates of the means per group
+#  anov <- lm(postnumb~site-1,sesamesim)
+#  # take a look at the estimated means and their names
+#  coef(anov)
+#  # set a seed value
+#  set.seed(100)
+#  # test hypotheses with bain
+#  results1 <- bain(anov, "site1=site2=site3=site4=site5; site2>site5>site1>
+#  site3>site4", fraction = 1)
+#  # display the results
+#  print(results1)
+#  # obtain the descriptives table
+#  summary(results1, ci = 0.95)
+#  # execute a sensitivity analysis. See Hoijtink, Mulder,
+#  # van Lissa, and Gu (2019) for elaborations.
+#  set.seed(100)
+#  results2 <- bain(anov, "site1=site2=site3=site4=site5; site2>site5>site1>
+#  site3>site4",fraction = 2)
+#  print(results2)
+#  set.seed(100)
+#  results3 <- bain(anov, "site1=site2=site3=site4=site5; site2>site5>site1>
+#  site3>site4",fraction = 3)
+#  print(results3)
+
+## ----ttest_ex10, eval=FALSE----------------------------------------------
+#  # Load the bain and lavaan libraries. Visit www.lavaan.org for
+#  # lavaan mini-tutorials, examples, and elaborations
+#  library(bain)
+#  library(lavaan)
+#  
+#  #  Specify and fit the confirmatory factor model
+#  model1 <- '
+#      A =~ Ab + Al + Af + An + Ar + Ac
+#      B =~ Bb + Bl + Bf + Bn + Br + Bc
+#  '
+#  # Use the lavaan sem function to execute the confirmatory factor analysis
+#  fit1 <- sem(model1, data = sesamesim, std.lv = TRUE)
+#  
+#  # Inspect the parameter names
+#  coef(fit1)
+#  
+#  # Formulate hypotheses, call bain, obtain summary stats
+#  hypotheses1 <-
+#  " A=~Ab > .6 & A=~Al > .6 & A=~Af > .6 & A=~An > .6 & A=~Ar > .6 & A=~Ac >.6 &
+#  B=~Bb > .6 & B=~Bl > .6 & B=~Bf > .6 & B=~Bn > .6 & B=~Br > .6 & B=~Bc >.6"
+#  set.seed(100)
+#  y <- bain(fit1,hypotheses1,fraction=1,standardize=TRUE)
+#  sy <- summary(y, ci = 0.95)
+#  
+
+## ----ttest_ex11, eval=FALSE----------------------------------------------
+#  # Load the bain and lavaan libraries. Visit www.lavaan.org for
+#  # lavaan mini-tutorials, examples, and elaborations
+#  library(bain)
+#  library(lavaan)
+#  
+#  # Specify and fit the latent regression model
+#  model2 <- '
+#      A  =~ Ab + Al + Af + An + Ar + Ac
+#      B =~ Bb + Bl + Bf + Bn + Br + Bc
+#  
+#      A ~ B + age + peabody
+#  '
+#  fit2 <- sem(model2, data = sesamesim, std.lv = TRUE)
+#  
+#  # Inspect the parameter names
+#  coef(fit2)
+#  
+#  # Formulate hypotheses, call bain, obtain summary stats
+#  
+#  hypotheses2 <- "A~B > A~peabody = A~age = 0;
+#                 A~B > A~peabody > A~age = 0;
+#  A~B > A~peabody > A~age > 0"
+#  set.seed(100)
+#  y1 <- bain(fit2, hypotheses2, fraction = 1, standardize = TRUE)
+#  sy1 <- summary(y1, ci = 0.99)
+
+## ----ttest_ex12, eval=FALSE----------------------------------------------
+#  # Load the bain and lavaan libraries. Visit www.lavaan.org for
+#  # lavaan mini-tutorials, examples, and elaborations
+#  library(bain)
+#  library(lavaan)
+#  
+#  # Specify the multiple group latent regression model
+#  
+#  model3 <- '
+#      A  =~ Ab + Al + Af + An + Ar + Ac
+#      B =~ Bb + Bl + Bf + Bn + Br + Bc
+#  
+#      A ~ B + age + peabody
+#  '
+#  # Assign labels to the groups to be used when formulating
+#  # hypotheses
+#  sesamesim$sex <- factor(sesamesim$sex, labels = c("boy", "girl"))
+#  # Fit the multiple group latent regression model
+#  fit3 <- sem(model3, data = sesamesim, std.lv = TRUE, group = "sex")
+#  # Inspect the parameter names
+#  coef(fit3)
+#  
+#  # Formulate and evaluate two sets of hypotheses
+#  
+#  # Compute the mean of the intercepts in both groups for both factors
+#  parest <- parameterEstimates(fit3, standardize = TRUE)
+#  ints <- parest[ parest$op == "~1", "std.all"]
+#  intAboy <- ints[1:6]
+#  intBboy <- ints[7:12]
+#  intAgirl <- ints[17:22]
+#  intBgirl <- ints[23:28]
+#  iAb <- mean(intAboy)
+#  iBb <- mean(intBboy)
+#  iAg <- mean(intAgirl)
+#  iBg <- mean(intBgirl)
+#  
+#  # Print the means so you can include these numbers
+#  # in the hypotheses in order to make the intercepts
+#  # comparable between both groups
+#  iAb
+#  iBb
+#  iAg
+#  iBg
+#  
+#  # Compute the geometric mean of the loadings in both groups for both factors
+#  load <- parest[ parest$op == "=~", "std.all"]
+#  loadAboy <- load[1:6]
+#  loadBboy <- load[7:12]
+#  loadAgirl <- load[13:18]
+#  loadBgirl <- load[19:24]
+#  lAb <- prod(loadAboy)**(1/6)
+#  lBb <- prod(loadBboy)**(1/6)
+#  lAg <- prod(loadAgirl)**(1/6)
+#  lBg <- prod(loadBgirl)**(1/6)
+#  
+#  # Print the inverse geometric means so you can include these numbers
+#  # in the hypotheses in order to make the slopes comparable
+#  # between both groups. Note: to specify hypotheses,
+#  # the * can be used, but the / CANNOT be used.
+#  1/lAb
+#  1/lBb
+#  1/lAg
+#  1/lBg
+#  
+#  # Specify and evaluate the two sets of hypotheses
+#  hypotheses31 <-
+#  "1.214269 *A=~Ab.boy = 1.276502 *A=~Ab.girl&
+#  1.214269 *A=~Al.boy = 1.276502 *A=~Al.girl &
+#  1.214269 *A=~Af.boy = 1.276502 *A=~Af.girl &
+#  1.214269 *A=~An.boy = 1.276502 *A=~An.girl &
+#  1.214269 *A=~Ar.boy = 1.276502 *A=~Ar.girl &
+#  1.214269 *A=~Ac.boy = 1.276502 *A=~Ac.girl &
+#  1.26346 *B=~Bb.boy = 1.32143 *B=~Bb.girl &
+#  1.26346 *B=~Bl.boy = 1.32143 *B=~Bl.girl &
+#  1.26346 *B=~Bf.boy = 1.32143 *B=~Bf.girl &
+#  1.26346 *B=~Bn.boy = 1.32143 *B=~Bn.girl &
+#  1.26346 *B=~Br.boy = 1.32143 *B=~Br.girl &
+#  1.26346 *B=~Bc.boy = 1.32143 *B=~Bc.girl &
+#  Ab~1.boy -3.20752= Ab~1.girl -3.37765&
+#  Al~1.boy -3.20752= Al~1.girl -3.37765&
+#  Af~1.boy -3.20752= Af~1.girl -3.37765&
+#  An~1.boy -3.20752= An~1.girl -3.37765&
+#  Ar~1.boy -3.20752= Ar~1.girl -3.37765&
+#  Ac~1.boy -3.20752= Ac~1.girl -3.37765&
+#  Bb~1.boy -2.682939= Bb~1.girl -2.620678&
+#  Bl~1.boy -2.682939= Bl~1.girl -2.620678&
+#  Bf~1.boy -2.682939= Bf~1.girl -2.620678&
+#  Bn~1.boy -2.682939= Bn~1.girl -2.620678&
+#  Br~1.boy -2.682939= Br~1.girl -2.620678&
+#  Bc~1.boy -2.682939= Bc~1.girl -2.620678
+#  "
+#  set.seed(100)
+#  y1 <- bain(fit3, hypotheses31, standardize = TRUE)
+#  sy1 <- summary(y1, ci = 0.90)
+#  
+#  hypotheses32 <-
+#  "1.214269 *A=~Ab.boy = 1.276502 *A=~Ab.girl &
+#  1.214269 *A=~Al.boy = 1.276502 *A=~Al.girl &
+#  1.214269 *A=~Af.boy = 1.276502 *A=~Af.girl &
+#  1.214269 *A=~An.boy = 1.276502 *A=~An.girl &
+#  1.214269 *A=~Ar.boy = 1.276502 *A=~Ar.girl &
+#  1.214269 *A=~Ac.boy = 1.276502 *A=~Ac.girl &
+#  1.26346 *B=~Bb.boy = 1.32143 *B=~Bb.girl &
+#  1.26346 *B=~Bl.boy = 1.32143 *B=~Bl.girl &
+#  1.26346 *B=~Bf.boy = 1.32143 *B=~Bf.girl &
+#  1.26346 *B=~Bn.boy = 1.32143 *B=~Bn.girl &
+#  1.26346 *B=~Br.boy = 1.32143 *B=~Br.girl &
+#  1.26346 *B=~Bc.boy = 1.32143 *B=~Bc.girl &
+#  Ab~1.boy -3.20752= Ab~1.girl -3.37765&
+#  Al~1.boy -3.20752= Al~1.girl -3.37765&
+#  Af~1.boy -3.20752= Af~1.girl -3.37765&
+#  An~1.boy -3.20752= An~1.girl -3.37765&
+#  Ar~1.boy -3.20752= Ar~1.girl -3.37765&
+#  Ac~1.boy -3.20752= Ac~1.girl -3.37765&
+#  Bb~1.boy -2.682939= Bb~1.girl -2.620678&
+#  Bl~1.boy -2.682939= Bl~1.girl -2.620678&
+#  Bf~1.boy -2.682939= Bf~1.girl -2.620678&
+#  Bn~1.boy -2.682939= Bn~1.girl -2.620678&
+#  Br~1.boy -2.682939= Br~1.girl -2.620678&
+#  Bc~1.boy -2.682939= Bc~1.girl -2.620678 &
+#  A~age.boy < A~age.girl  &
+#  A~peabody.boy < A~peabody.girl  &
+#  A~B.boy < A~B.girl;
+#  1.214269 *A=~Ab.boy = 1.276502 *A=~Ab.girl &
+#  1.214269 *A=~Al.boy = 1.276502 *A=~Al.girl &
+#  1.214269 *A=~Af.boy = 1.276502 *A=~Af.girl &
+#  1.214269 *A=~An.boy = 1.276502 *A=~An.girl &
+#  1.214269 *A=~Ar.boy = 1.276502 *A=~Ar.girl &
+#  1.214269 *A=~Ac.boy = 1.276502 *A=~Ac.girl &
+#  1.26346 *B=~Bb.boy = 1.32143 *B=~Bb.girl &
+#  1.26346 *B=~Bl.boy = 1.32143 *B=~Bl.girl &
+#  1.26346 *B=~Bf.boy = 1.32143 *B=~Bf.girl &
+#  1.26346 *B=~Bn.boy = 1.32143 *B=~Bn.girl &
+#  1.26346 *B=~Br.boy = 1.32143 *B=~Br.girl &
+#  1.26346 *B=~Bc.boy = 1.32143 *B=~Bc.girl &
+#  Ab~1.boy -3.20752= Ab~1.girl -3.37765&
+#  Al~1.boy -3.20752= Al~1.girl -3.37765&
+#  Af~1.boy -3.20752= Af~1.girl -3.37765&
+#  An~1.boy -3.20752= An~1.girl -3.37765&
+#  Ar~1.boy -3.20752= Ar~1.girl -3.37765&
+#  Ac~1.boy -3.20752= Ac~1.girl -3.37765&
+#  Bb~1.boy -2.682939= Bb~1.girl -2.620678&
+#  Bl~1.boy -2.682939= Bl~1.girl -2.620678&
+#  Bf~1.boy -2.682939= Bf~1.girl -2.620678&
+#  Bn~1.boy -2.682939= Bn~1.girl -2.620678&
+#  Br~1.boy -2.682939= Br~1.girl -2.620678&
+#  Bc~1.boy -2.682939= Bc~1.girl -2.620678 &
+#  A~age.boy = A~age.girl  &
+#  A~peabody.boy < A~peabody.girl  &
+#  A~B.boy < A~B.girl;
+#  1.214269 *A=~Ab.boy = 1.276502 *A=~Ab.girl &
+#  1.214269 *A=~Al.boy = 1.276502 *A=~Al.girl &
+#  1.214269 *A=~Af.boy = 1.276502 *A=~Af.girl &
+#  1.214269 *A=~An.boy = 1.276502 *A=~An.girl &
+#  1.214269 *A=~Ar.boy = 1.276502 *A=~Ar.girl &
+#  1.214269 *A=~Ac.boy = 1.276502 *A=~Ac.girl &
+#  1.26346 *B=~Bb.boy = 1.32143 *B=~Bb.girl &
+#  1.26346 *B=~Bl.boy = 1.32143 *B=~Bl.girl &
+#  1.26346 *B=~Bf.boy = 1.32143 *B=~Bf.girl &
+#  1.26346 *B=~Bn.boy = 1.32143 *B=~Bn.girl &
+#  1.26346 *B=~Br.boy = 1.32143 *B=~Br.girl &
+#  1.26346 *B=~Bc.boy = 1.32143 *B=~Bc.girl &
+#  Ab~1.boy -3.20752= Ab~1.girl -3.37765&
+#  Al~1.boy -3.20752= Al~1.girl -3.37765&
+#  Af~1.boy -3.20752= Af~1.girl -3.37765&
+#  An~1.boy -3.20752= An~1.girl -3.37765&
+#  Ar~1.boy -3.20752= Ar~1.girl -3.37765&
+#  Ac~1.boy -3.20752= Ac~1.girl -3.37765&
+#  Bb~1.boy -2.682939= Bb~1.girl -2.620678&
+#  Bl~1.boy -2.682939= Bl~1.girl -2.620678&
+#  Bf~1.boy -2.682939= Bf~1.girl -2.620678&
+#  Bn~1.boy -2.682939= Bn~1.girl -2.620678&
+#  Br~1.boy -2.682939= Br~1.girl -2.620678&
+#  Bc~1.boy -2.682939= Bc~1.girl -2.620678 &
+#  A~age.boy = A~age.girl  &
+#  A~peabody.boy = A~peabody.girl  &
+#  A~B.boy < A~B.girl;
+#  1.214269 *A=~Ab.boy = 1.276502 *A=~Ab.girl &
+#  1.214269 *A=~Al.boy = 1.276502 *A=~Al.girl &
+#  1.214269 *A=~Af.boy = 1.276502 *A=~Af.girl &
+#  1.214269 *A=~An.boy = 1.276502 *A=~An.girl &
+#  1.214269 *A=~Ar.boy = 1.276502 *A=~Ar.girl &
+#  1.214269 *A=~Ac.boy = 1.276502 *A=~Ac.girl &
+#  1.26346 *B=~Bb.boy = 1.32143 *B=~Bb.girl &
+#  1.26346 *B=~Bl.boy = 1.32143 *B=~Bl.girl &
+#  1.26346 *B=~Bf.boy = 1.32143 *B=~Bf.girl &
+#  1.26346 *B=~Bn.boy = 1.32143 *B=~Bn.girl &
+#  1.26346 *B=~Br.boy = 1.32143 *B=~Br.girl &
+#  1.26346 *B=~Bc.boy = 1.32143 *B=~Bc.girl &
+#  Ab~1.boy -3.20752= Ab~1.girl -3.37765&
+#  Al~1.boy -3.20752= Al~1.girl -3.37765&
+#  Af~1.boy -3.20752= Af~1.girl -3.37765&
+#  An~1.boy -3.20752= An~1.girl -3.37765&
+#  Ar~1.boy -3.20752= Ar~1.girl -3.37765&
+#  Ac~1.boy -3.20752= Ac~1.girl -3.37765&
+#  Bb~1.boy -2.682939= Bb~1.girl -2.620678&
+#  Bl~1.boy -2.682939= Bl~1.girl -2.620678&
+#  Bf~1.boy -2.682939= Bf~1.girl -2.620678&
+#  Bn~1.boy -2.682939= Bn~1.girl -2.620678&
+#  Br~1.boy -2.682939= Br~1.girl -2.620678&
+#  Bc~1.boy -2.682939= Bc~1.girl -2.620678 &
+#  A~age.boy = A~age.girl  &
+#  A~peabody.boy = A~peabody.girl  &
+#  A~B.boy = A~B.girl"
+#  set.seed(100)
+#  y2 <- bain(fit3, hypotheses32,standardize=TRUE)
+#  
+
+## ----ttest_ex13, eval=FALSE----------------------------------------------
 #  # load the bain package which includes the simulated sesamesim data se
 #  library(bain)
 #  # make a factor of variable site
@@ -194,14 +485,17 @@ knitr::opts_chunk$set(
 #  estimate <- coef(anov)
 #  # give names to the estimates in anov
 #  names(estimate) <- c("site1", "site2", "site3","site4","site5")
-#  # create a vector containing the sample sizes of each group
+#  # create a vector containing the sample size of each group
+#  # (in case of missing values in the variables used, the command
+#  # below has to be modified such that only the cases without
+#  # missing values are counted)
 #  ngroup <- table(sesamesim$site)
 #  # compute for each group the covariance matrix of the parameters
 #  # of that group and collect these in a list
 #  # for the ANOVA this is simply a list containing for each group the variance
 #  # of the mean note that, the within group variance as estimated using lm is
 #  # used to compute the variance of each of the means! See, Hoijtink, Gu, and
-#  # Mulder (2018) for further elaborations.
+#  # Mulder (2019) for further elaborations.
 #  var <- summary(anov)$sigma**2
 #  cov1 <- matrix(var/ngroup[1], nrow=1, ncol=1)
 #  cov2 <- matrix(var/ngroup[2], nrow=1, ncol=1)
@@ -222,7 +516,7 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results, ci = 0.95)
 
-## ----ttest_ex10, eval=FALSE----------------------------------------------
+## ----ttest_ex14, eval=FALSE----------------------------------------------
 #  # load the bain package which includes the simulated sesamesim data se
 #  library(bain)
 #  # make a factor of variable site
@@ -242,6 +536,9 @@ knitr::opts_chunk$set(
 #  # assign names to the estimates
 #  names(estimates)<- c("v.1", "v.2", "v.3", "v.4","v.5", "pre")
 #  # compute the sample size per group
+#  # (in case of missing values in the variables used, the command
+#  # below has to be modified such that only the cases without
+#  # missing values are counted)
 #  ngroup <- table(sesamesim$site)
 #  # compute for each group the covariance matrix of the parameters of that
 #  # group and collect these in a list note that, the residual variance as
@@ -249,7 +546,7 @@ knitr::opts_chunk$set(
 #  var <- (summary(ancov2)$sigma)**2
 #  # below, for each group, the covariance matrix of the adjusted mean and
 #  # covariate is computed
-#  # see Hoijtink, Gu, and Mulder (2018) for further explanation and elaboration
+#  # see Hoijtink, Gu, and Mulder (2019) for further explanation and elaboration
 #  cat1 <- subset(cbind(sesamesim$site,sesamesim$prenumb), sesamesim$site == 1)
 #  cat1[,1] <- 1
 #  cat1 <- as.matrix(cat1)
@@ -288,7 +585,7 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results2, ci = 0.95)
 
-## ----ttest_ex11, eval=FALSE----------------------------------------------
+## ----ttest_ex15, eval=FALSE----------------------------------------------
 #  # load the bain package which includes the simulated sesamesim data set
 #  library(bain)
 #  # estimate the means of three repeated measures of number knowledge
@@ -305,6 +602,9 @@ knitr::opts_chunk$set(
 #  # give names to the estimates in anov
 #  names(estimate) <- c("pre", "post", "fu")
 #  # compute the sample size
+#  # (in case of missing values in the variables used, the command
+#  # below has to be modified such that only the cases without
+#  # missing values are counted)
 #  ngroup <- nrow(sesamesim)
 #  # compute the covariance matrix of the three means
 #  covmatr <- list(vcov(within))
@@ -319,7 +619,7 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results, ci = 0.95)
 
-## ----ttest_ex12, eval=FALSE----------------------------------------------
+## ----ttest_ex16, eval=FALSE----------------------------------------------
 #  # load the bain package which includes the simulated sesamesim data set
 #  library(bain)
 #  # make a factor of the variable sex
@@ -336,6 +636,9 @@ knitr::opts_chunk$set(
 #  # give names to the estimates in anov
 #  names(estimate) <- c("pre1", "post1", "fu1","pre2", "post2", "fu2")
 #  # determine the sample size per group
+#  # (in case of missing values in the variables used, the command
+#  # below has to be modified such that only the cases without
+#  # missing values are counted)
 #  ngroup<-table(sesamesim$sex)
 #  # cov1 has to contain the covariance matrix of the three means in group 1.
 #  # cov2 has to contain the covariance matrix in group 2
@@ -362,7 +665,7 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results, ci = 0.95)
 
-## ----ttest_ex13, eval=FALSE----------------------------------------------
+## ----ttest_ex17, eval=FALSE----------------------------------------------
 #  # load the bain package which includes the simulated sesamesim data set
 #  library(bain)
 #  # regression coefficients can only be mutually compared if the
@@ -383,6 +686,9 @@ knitr::opts_chunk$set(
 #  # give names to the estimates
 #  names(estimate) <- c("int", "age", "peab" ,"pre" )
 #  # compute the sample size. Note that, this is an analysis with ONE group
+#  # (in case of missing values in the variables used, the command
+#  # below has to be modified such that only the cases without
+#  # missing values are counted)
 #  ngroup <- nrow(sesamesim)
 #  # compute the covariance matrix of the intercept and regression coefficients
 #  covmatr <- list(vcov(logreg))
@@ -398,7 +704,7 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results, ci = 0.95)
 
-## ----ttest_ex14, eval=FALSE----------------------------------------------
+## ----ttest_ex18, eval=FALSE----------------------------------------------
 #  # load the bain package which includes the simulated sesamesim data set
 #  library(bain)
 #  # load the numDeriv package which will be used to compute the covariance
@@ -411,6 +717,9 @@ knitr::opts_chunk$set(
 #  # center the covariate age
 #  sesamesim$age <- sesamesim$age - mean(sesamesim$age)
 #  # determine sample size per sex group
+#  # (in case of missing values in the variables used, the command
+#  # below has to be modified such that only the cases without
+#  # missing values are counted)
 #  ngroup <- table(sesamesim$sex)
 #  # execute the logistic regression, -1 ensures that the coefficients
 #  # for boys and girl are estimated adjusted for the covariate age
@@ -486,7 +795,7 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results, ci = 0.95)
 
-## ----ttest_ex15, eval=FALSE----------------------------------------------
+## ----ttest_ex19, eval=FALSE----------------------------------------------
 #  # load the bain package which includes the simulated sesamesim data set
 #  library(bain)
 #  # load the WRS2 package which renders the trimmed sample mean and
@@ -495,6 +804,9 @@ knitr::opts_chunk$set(
 #  # make a factor of variable site
 #  sesamesim$site <- as.factor(sesamesim$site)
 #  # create a vector containing the sample sizes of each group
+#  # (in case of missing values in the variables used, the command
+#  # below has to be modified such that only the cases without
+#  # missing values are counted)
 #  ngroup <- table(sesamesim$site)
 #  # Compute the 20\% sample trimmed mean for each site
 #  estimates <- c(mean(sesamesim$postnumb[sesamesim$site == 1], tr = 0.2),
@@ -528,7 +840,7 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results, ci = 0.95)
 
-## ----ttest_ex16, eval=FALSE----------------------------------------------
+## ----ttest_ex20, eval=FALSE----------------------------------------------
 #  # load the bain package which includes the simulated sesamesim data set
 #  library(bain)
 #  # load the mice (multiple imputation of missing data), psych
@@ -582,14 +894,14 @@ knitr::opts_chunk$set(
 #  # execute 1000 multiple regressions using the imputed data matrices and store the estimates
 #  # of only the regression coefficients of funumb on prenumb and postnumband and the average
 #  # of the 1000 covariance matrices.
-#  # See Hoijtink, Gu, Mulder, and Rosseel (2018) for an explanation of the latter.
+#  # See Hoijtink, Gu, Mulder, and Rosseel (2019) for an explanation of the latter.
 #  for(i in 1:M) {
 #  mulres <- lm(funumb~prenumb+postnumb,complete(out,i))
 #  mulest[i,]<-coef(mulres)[2:3]
 #  covwithin<-covwithin + 1/M * vcov(mulres)[2:3,2:3]
 #  }
 #  # Compute the average of the estimates and assign names, the between and total covariance matrix.
-#  # See Hoijtink, Gu, Mulder, and Rosseel (2018) for an explanation.
+#  # See Hoijtink, Gu, Mulder, and Rosseel (2019) for an explanation.
 #  estimates <- colMeans(mulest)
 #  names(estimates) <- c("prenumb", "postnumb")
 #  covbetween <- cov(mulest)
@@ -597,7 +909,7 @@ knitr::opts_chunk$set(
 #  # determine the sample size
 #  samp <- nrow(sesamesim)
 #  # compute the effective sample size
-#  # See Hoijtink, Gu, Mulder, and Rosseel (2018) for an explanation.
+#  # See Hoijtink, Gu, Mulder, and Rosseel (2019) for an explanation.
 #  nucom<-samp-length(estimates)
 #  lam <- (1+1/M)*(1/length(estimates))* tr(covbetween %*% ginv(covariance))
 #  nuold<-(M-1)/(lam^2)
@@ -615,42 +927,70 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results, ci = 0.95)
 
-## ----ttest_ex17, eval=FALSE----------------------------------------------
-#  # load the bain package
+## ----ttest_ex21, eval=FALSE----------------------------------------------
+#  # Load the bain and lavaan libraries. Visit www.lavaan.org for
+#  # lavaan mini-tutorials, examples, and elaborations
 #  library(bain)
-#  # load the lavaan package - look at the lavaan help file to obtain
-#  # further information - also surf to # lavaan.ugent.be to obtain
-#  # further information and references for lavaan - this example uses the
-#  # HolzingerSwineford1939 data set which is included with lavaan.
 #  library(lavaan)
-#  # Specify a latent regression model
-#  model <- 'visual  =~ x1 + x2 + x3
-#  textual =~ x4 + x5 + x6
-#  speed   =~ x7 + x8 + x9
-#  speed ~ textual + visual'
-#  # Estimate the parameters of the latent regression model with lavaan
-#  fit<-sem(model,data=HolzingerSwineford1939,std.lv = TRUE)
-#  # determine the sample size
-#  ngroup<-nobs(fit)
-#  # collect the "standardized" estimates of the latent regression
-#  # coefficients in a vector, typing standardizedSolution(fit)
-#  # in the console pane shows that the estimates can be
-#  # found in the fourth column of rows 10 and 11.
-#  estimate<-standardizedSolution(fit)[10:11,4]
-#  # assign names to the estimates
-#  names(estimate) <- c("textual","visual")
-#  # determine the covariance matrix of the estimates typing
-#  # lavInspect(fit, "vcov.std.all") in the console pane shows that the
-#  # estimates can be found in the rows 10 and 11 crossed with
-#  # columns 10 and 11
-#  covariance<-list(lavInspect(fit, "vcov.std.all")[10:11,10:11])
-#  # set a seed value
+#  
+#  # Specify and fit the confirmatory factor model
+#  model1 <- '
+#  A =~ Ab + Al + Af + An + Ar + Ac
+#  B =~ Bb + Bl + Bf + Bn + Br + Bc
+#  '
+#  fit1 <- sem(model1, data = sesamesim, std.lv = TRUE)
+#  
+#  # Obtain the required input for bain:
+#  
+#  # the sample size
+#  ngroup1 <- nobs(fit1)
+#  
+#  # The parameterEstimates() function presents the estimated parameters
+#  # in a data.frame; the additional argument standardized = TRUE add
+#  # extra columns with standardized versions of these parameter estimates;
+#  # for our purposes, we need the 'std.all' column, which means that both
+#  # the observed and the latent variables have been standardized.
+#  #
+#  # we capture the output of parameterEstimates() in an object 'PE'
+#  PE1 <- parameterEstimates(fit1, standardized = TRUE)
+#  
+#  # We only need the rows that correspond to factor loadings (ie op == "=~")
+#  # and the column "std.all":
+#  estimate1 <- PE1[ PE1$op == "=~", "std.all"]
+#  
+#  # Assign names to the estimates of the standardized factor loadingts
+#  names(estimate1) <- c("Ab", "Al", "Af", "An", "Ar", "Ac",
+#                       "Bb", "Bl", "Bf", "Bn", "Br", "Bc")
+#  
+#  # We will compute the full covariance matrix of standardized parameter
+#  # estimates, and only extract the part we need: the rows/cols that
+#  # correspond to the factor loadings
+#  #
+#  # to find out which rows/cols we need, we can look at the full parameter
+#  # table:
+#  PT1 <- parTable(fit1)
+#  # and extract the parameter numbers (in the "free" column) that correspond
+#  # to the factor loadings:
+#  par.idx1 <- PT1$free[ PT1$op == "=~" ]
+#  # Obtain the covariance matrix of the standardized factor loadings
+#  covariance1 <- list(lavInspect(fit1, "vcov.std.all")[par.idx1, par.idx1])
+#  
+#  # Specify the hypotheses using the syntax implementen in bain. Note that
+#  # the & is used to combine different parts into one hypothesis. Note
+#  # furthermore, that the ; is used to separate hypotheses
+#  hypotheses1 <-
+#     " Ab > .6 & Al > .6 & Af > .6 & An > .6 & Ar > .6 & Ac >.6 &
+#       Bb > .6 & Bl > .6 & Bf > .6 & Bn > .6 & Br > .6 & Bc >.6"
+#  
+#  # Evaluate the hypotheses using bain, the command used has been explained in
+#  # the paper. Don't forget to set the seed first in order to obtain results
+#  # that can be reproduced exactly.
 #  set.seed(100)
-#  # test hypotheses with bain
-#  results <- bain(estimate,"visual=textual=0; visual > textual >
-#  0",n=ngroup,Sigma=covariance,group_parameters=2,joint_parameters = 0)
-#  # display the results
-#  print(results)
-#  # obtain the descriptives table
-#  summary(results, ci = 0.95)
+#  y <- bain(estimate1, hypotheses1, n =ngroup1, Sigma = covariance1,
+#                  group_parameters = 12, joint_parameters = 0, fraction = 1,
+#                  standardize = TRUE)
+#  
+#  # print the results of the bain analysis and obtain the estimates and 95%
+#  # central credibility intervals
+#  sy <- summary(z, ci = 0.95)
 

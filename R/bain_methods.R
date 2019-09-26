@@ -3,9 +3,12 @@
 #' \code{bain} is an acronym for "Bayesian informative hypotheses evaluation".
 #' It uses the Bayes factor to evaluate hypotheses specified using equality and
 #' inequality constraints among (linear combinations of) parameters in a wide
-#' range of statistical models. A tutorial is provided by Hoijtink, Mulder,
-#' van Lissa, and Gu (2018) retrievable from the Psychological Methods website
-#' at \url{https://www.apa.org/pubs/journals/met/} or the bain website at
+#' range of statistical models. A tutorial by Hoijtink, Mulder, van Lissa,
+#' and Gu (2018), was published in
+#' \href{https://www.doi.org/10.1037\%2Fmet0000201}{Psychological Methods}.
+#' The preprint of that tutorial is available at
+#' \href{https://psyarxiv.com/v3shc/}{DOI:10.31234/osf.io/v3shc}, or on the bain
+#' website at
 #' \url{https://informative-hypotheses.sites.uu.nl/software/bain/}
 #' \strong{Users are
 #' advised to read the tutorial AND the vignette that is provided
@@ -13,12 +16,16 @@
 #'
 #' @param x An R object containing the outcome of a statistical analysis.
 #' Currently, the following objects can be processed: \code{lm()},
-#' \code{t_test()}, and named vector objects. See the vignette for
-#' elaborations.
+#' \code{t_test()}, \code{lavaan} objects created with the
+#' \code{sem()}, \code{cfa()}, and \code{growth()} functions, and named
+#' vector objects. See the vignette for elaborations.
 #' @param hypothesis	A character string containing the informative hypotheses
 #' to evaluate. See the vignette for elaborations.
+#' @param fraction A number representing the fraction of information
+#' in the data used to construct the prior distribution
+#' (see the tutorial DOI: 10.1037/met0000201): The default value 1 denotes the
+#' minimal fraction, 2 denotes twice the minimal fraction, etc.
 #' @param ... Additional arguments. See the vignette for elaborations.
-#'
 #'
 #' @return The main output resulting from analyses with \code{bain} are
 #' Bayes factors and posterior model probabilities associated with the
@@ -92,7 +99,7 @@
 #' @importFrom stats as.formula coef complete.cases cov lm model.frame
 #' model.matrix pt qt sd setNames summary.lm var vcov
 #'
-bain <- function(x, hypothesis, ...) {
+bain <- function(x, hypothesis, fraction = 1, ...) {
   UseMethod("bain", x)
 }
 
@@ -102,11 +109,14 @@ bain <- function(x, hypothesis, ...) {
 bain.lm <-
   function(x,
            hypothesis,
+           fraction = 1,
            ...,
            standardize = FALSE) {
-
     cl <- match.call()
     Args <- as.list(cl[-1])
+    if(!class(x$coefficients) == "numeric"){
+      stop("It appears that you are trying to run a multivariate linear model. This cannot be done using a lm() object as input for bain. Instead use a named numeric vector. See vignette('Introduction_to_bain') for further information")
+    }
     # Checken of het factor OF ordered factor is!!!!!!
     # Nu wordt overal (?) factor_variables[-1] gebruikt. Kan het niet gewoon één keer hier [-1]?
     factor_variables <- sapply(x$model[-1], inherits, what = "factor")
@@ -120,14 +130,14 @@ bain.lm <-
              !grepl(":", paste(names(x$coefficients), collapse = ""))){ # AND no interactions between that factor and continuous predictors
             "ANCOVA"
           } else {
-            "mixed_predictors"
             Warnings <- c(Warnings,
                           "Calling bain on an object of type 'lm' with mixed predictors (factors and numeric predictors) may result in untrustworthy results. Please interpret with caution."
             )
+            "mixed predictors"
           }
         }
       } else {
-        "continuous_predictors"
+        "continuous predictors"
       }
 
     switch(which_model,
@@ -182,15 +192,15 @@ bain.lm <-
 
              if(anyNA(coef_in_hyp)){
                stop("Some of the parameters referred to in the 'hypothesis' do not correspond to parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' did not match any parameters in 'x': ",
-                    paste(hyp_params[is.na(coef_in_hyp)], collapse = ", "),
+                    paste(reverse_rename_function(hyp_params[is.na(coef_in_hyp)]), collapse = ", "),
                     "\n  The parameters in object 'x' are named: ",
-                    paste(names(x$coefficients), collapse = ", "))
+                    paste(reverse_rename_function(names(x$coefficients)), collapse = ", "))
              }
              if(any(coef_in_hyp == 0)){
                stop("Some of the parameters referred to in the 'hypothesis' matched multiple parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' matched multiple parameters in 'x': ",
-                    paste(hyp_params[coef_in_hyp == 0], collapse = ", "),
+                    paste(reverse_rename_function(hyp_params[coef_in_hyp == 0]), collapse = ", "),
                     "\n  The parameters in object 'x' are named: ",
-                    paste(names(x$coefficients), collapse = ", "))
+                    paste(reverse_rename_function(names(x$coefficients)), collapse = ", "))
              }
 
              if (!standardize) {
@@ -227,8 +237,46 @@ bain.lm <-
       Bain_res$Warnings <- Warnings
     }
     class(Bain_res) <- c("bain_lm", class(Bain_res))
+    attr(Bain_res, "which_model") <- which_model
     Bain_res
   }
+
+
+
+#' @method bain lavaan
+#' @export
+bain.lavaan <- function(x, hypothesis, fraction = 1, ..., standardize = FALSE) {
+  cl <- match.call()
+  Args <- as.list(cl[-1])
+
+  num_levels         <- lavInspect(x, what = "nlevels")
+  if(grepl("~~", hypothesis)){
+    stop("Bain cannot yet handle hypotheses about (co)variance parameters in lavaan models.")
+  }
+  if (num_levels > 1) {
+    # Multilevel structure in data: Gives warning since this aspect is not integrated.
+    stop(
+      paste(
+        "Lavaan object contains",
+        num_levels ,
+        "levels. Multilevel structures are not yet integrated in Lav_in_Bain."
+      )
+    )
+  }
+
+  Args[c("x", "Sigma", "n", "group_parameters", "joint_parameters")] <- lav_get_estimates(x, standardize)
+  Args$hypothesis <-  hypothesis
+  #browser()
+  Bain_res <- do.call(bain, Args)
+  Bain_res$call <- cl
+  Bain_res$model <- x
+  class(Bain_res) <- c("bain_lavaan", class(Bain_res))
+
+  Bain_res$hypotheses <- reverse_rename_function(Bain_res$hypotheses)
+  names(Bain_res$estimates) <- reverse_rename_function(names(Bain_res$estimates))
+  Bain_res
+}
+
 
 
 #' @method bain htest
@@ -236,15 +284,17 @@ bain.lm <-
 bain.htest <-
   function(x,
            hypothesis,
+           fraction = 1,
            ...) {
     stop("The standard t.test() function from the 'stats' package does not return variance and sample size, which are required to run bain. Please use the function t_test() from the 'bain' package instead. It accepts the same arguments.")
 }
 
-#' @method bain bain_htest
+#' @method bain t_test
 #' @export
-bain.bain_htest <-
+bain.t_test <-
   function(x,
            hypothesis,
+           fraction = 1,
            ...) {
       cl <- match.call()
       Args <- as.list(cl[-1])
@@ -257,7 +307,7 @@ bain.bain_htest <-
         Args$group_parameters <- 0
         Args$joint_parameters <- 1
       } else {
-        if (!x$method == " Two Sample t_test") {
+        if (!x$method %in% c(" Two Sample t_test", " Two Sample t-test")) {
           Args$Sigma <- lapply(x$v/x$n, as.matrix)
         } else {
           df <- sum(x$n) - 2
@@ -276,7 +326,7 @@ bain.bain_htest <-
       Bain_res <- do.call(bain, Args)
       Bain_res$call <- cl
       Bain_res$model <- x
-      class(Bain_res) <- c("bain_htest", class(Bain_res))
+      class(Bain_res) <- c("t_test", class(Bain_res))
       Bain_res
 }
 
@@ -284,6 +334,7 @@ bain.bain_htest <-
 #' @export
 bain.default <- function(x,
                          hypothesis,
+                         fraction = 1,
                          ...,
                          n,
                          Sigma,
@@ -300,15 +351,17 @@ bain.default <- function(x,
 # Parse hypotheses --------------------------------------------------------
   #ren_estimate <- rename_estimate(x)
   parsed_hyp <- parse_hypothesis(names(x), hypothesis)
-  hyp_mat <- parsed_hyp$hyp_mat
+  hyp_mat <- do.call(rbind, parsed_hyp$hyp_mat)
   n_hyp <- length(parsed_hyp$original_hypothesis)
   n_constraints <- parsed_hyp$n_constraints
 
 
 # Check legal input -------------------------------------------------------
-  if(group_parameters > 1 & joint_parameters > 0){
-    stop("Bain can not yet evaluate hypotheses where group_parameters is larger than 1 and joint_parameters is larger than 0.")
-  }
+# CASPAR THE CHECK BELOW IS NO LONGER NECESSARY. ALL WORKS FINE
+#    if(group_parameters > 1 & joint_parameters > 0){
+#    stop("Bain can not yet evaluate hypotheses where group_parameters is larger than 1 and joint_parameters is larger than 0.")
+#  }
+
   rank_hyp <- qr(hyp_mat)$rank
 
   ##for unit group
@@ -324,11 +377,11 @@ bain.default <- function(x,
       stop("The rank of covariance matrix 'Sigma' did not match the number of estimates in 'x'.")
     }
     if (checkcov(Sigma) == 1) {
-      # CJ: Please give a more informative error here
-      stop("the covariance matrix 'Sigma' you entered contains errors since it cannot exist")
+      # CJ: Please give a more informative error here DONE-HH
+      stop("Your covariance matrix ('Sigma') is not positive definite.")
     }
 
-    b <- rank_hyp / n
+    b <- rank_hyp / (n / fraction)
     thetacovpost <- Sigma
     thetacovprior <- thetacovpost / b
   }
@@ -341,7 +394,7 @@ bain.default <- function(x,
     }
     if (any(unlist(lapply(Sigma, checkcov)) == 1)) {
       # CJ: Please replace with a more informative error message
-      stop("the covariance matrix 'Sigma' you entered contains errors since it cannot exist")
+      stop("One of your covariance matrices ('Sigma') is not positive definite.")
     }
 
     dim_group_parameters <- sapply(Sigma, dim)
@@ -363,8 +416,8 @@ bain.default <- function(x,
     b <- rep(0, n_Sigma)
     prior_cov <- vector("list", length = n_Sigma)
     for (p in 1:n_Sigma) {
-      b[p] <- 1 / n_Sigma * rank_hyp / n[p]
-      prior_cov[[p]] <- Sigma[[p]] / b[p]
+      b[p] <- 1 / n_Sigma * rank_hyp / (n[p] / fraction)
+      prior_cov[[p]] <- Sigma[[p]] / (b[p])
     }
 
     inv_prior <- lapply(prior_cov, solve)
@@ -373,7 +426,6 @@ bain.default <- function(x,
     thetacovprior <- covmatrixfun(inv_prior, group_parameters, joint_parameters, n_Sigma)
     thetacovpost <- covmatrixfun(inv_post, group_parameters, joint_parameters, n_Sigma)
   }
-
 
 # Check legality of constraints -------------------------------------------
 
@@ -414,12 +466,18 @@ bain.default <- function(x,
   #Hypotheses are not comparable.
   if (error == 1) {
     stop(
-      "BaIn is not suited for the evaluation of one or more of the hypotheses,\n because the adjusted prior mean cannot be determined from R theta = r."
+      "Your hypotheses are not compatible, that is, they cannot be jointly
+evaluated, OR, one of your hypotheses is impossible. See the vignette
+      for an explanation of compatibility and possibility.
+      "
     )
   }
   if (error == 2) {
     stop(
-      "The informative hypotheses under evaluation are not comparable,\n and/or BaIn is not suited for the evaluation of one or more of the hypotheses,\n because the adjusted prior mean cannot be determined from R theta = r."
+      "Your hypotheses are not compatible, that is, they cannot be jointly
+evaluated, OR, one of your hypotheses is impossible. See the vignette
+      for an explanation of compatibility and possibility.
+      "
     )
   }
 
@@ -505,8 +563,11 @@ bain.default <- function(x,
         }
       }
     }
-
-    invbetadiagpost <- diag(solve(as.matrix(betacovpost)))
+    invbetadiagpost <- tryCatch({
+        diag(solve(as.matrix(betacovpost)))
+      }, error = function(e) {
+        stop(paste(e, "\nOne of the following issues caused an error. It could be that:\n* One or more of the constraints you specified is redundant. You have to delete one or more of the constraints without changing the hypothesis. For example, a = b & a > 0 & b > 0 is equivalent to a = b & a > 0\n* Your hypotheses are not compatible, that is, they cannot be jointly evaluated\n* One of your hypotheses is impossible. See the vignette for an explanation of compatibility and possibility.\n* Your covariance matrix is not positive definite, that is, it cannot exist and therefore contains errors. See the vignette for further explanations."), call. = FALSE)
+      })
     invbetadiagpri <- diag(solve(as.matrix(betacovpri)))
     Bpost <-
       diag(1, n_constraints[2 * h - 1] + rowrank) - solve(diag(invbetadiagpost, n_constraints[2 *
@@ -612,13 +673,16 @@ bain.default <- function(x,
     BFmatrix = BFmatrix,
     b = b,
     prior = thetacovprior,
-    posterior = thetacovpost,
+    posterior = as.matrix(thetacovpost),
     call = cl,
     model = x,
     hypotheses = gsub("___X___", ":", parsed_hyp$original_hypothesis),
     independent_restrictions = rank_hyp,
     estimates = x,
-    n = n
+    n = as.vector(n),
+    Sigma = Sigma,
+    group_parameters = group_parameters,
+    joint_parameters = joint_parameters
   )
   class(Bainres) <- "bain"
   Bainres

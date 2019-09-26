@@ -4,16 +4,22 @@
 \alias{bain}
 \title{Bayes factors for informative hypotheses}
 \usage{
-bain(x, hypothesis, ...)
+bain(x, hypothesis, fraction = 1, ...)
 }
 \arguments{
 \item{x}{An R object containing the outcome of a statistical analysis.
 Currently, the following objects can be processed: \code{lm()},
-\code{t_test()}, and named vector objects. See the vignette for
-elaborations.}
+\code{t_test()}, \code{lavaan} objects created with the
+\code{sem()}, \code{cfa()}, and \code{growth()} functions, and named
+vector objects. See the vignette for elaborations.}
 
 \item{hypothesis}{A character string containing the informative hypotheses
 to evaluate. See the vignette for elaborations.}
+
+\item{fraction}{A number representing the fraction of information
+in the data used to construct the prior distribution
+(see the tutorial DOI: 10.1037/met0000201): The default value 1 denotes the
+minimal fraction, 2 denotes twice the minimal fraction, etc.}
 
 \item{...}{Additional arguments. See the vignette for elaborations.}
 }
@@ -27,9 +33,12 @@ hypotheses that are evaluated. See the \strong{tutorial} and the
 \code{bain} is an acronym for "Bayesian informative hypotheses evaluation".
 It uses the Bayes factor to evaluate hypotheses specified using equality and
 inequality constraints among (linear combinations of) parameters in a wide
-range of statistical models. A tutorial is provided by Hoijtink, Mulder,
-van Lissa, and Gu (2018) retrievable from the Psychological Methods website
-at \url{https://www.apa.org/pubs/journals/met/} or the bain website at
+range of statistical models. A tutorial by Hoijtink, Mulder, van Lissa,
+and Gu (2018), was published in
+\href{https://www.doi.org/10.1037\%2Fmet0000201}{Psychological Methods}.
+The preprint of that tutorial is available at
+\href{https://psyarxiv.com/v3shc/}{DOI:10.31234/osf.io/v3shc}, or on the bain
+website at
 \url{https://informative-hypotheses.sites.uu.nl/software/bain/}
 \strong{Users are
 advised to read the tutorial AND the vignette that is provided
