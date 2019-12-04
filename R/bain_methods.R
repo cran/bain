@@ -114,7 +114,7 @@ bain.lm <-
            standardize = FALSE) {
     cl <- match.call()
     Args <- as.list(cl[-1])
-    if(!class(x$coefficients) == "numeric"){
+    if(!("numeric" %in% class(x$coefficients)) | !is.null(dim(x$coefficients))){
       stop("It appears that you are trying to run a multivariate linear model. This cannot be done using a lm() object as input for bain. Instead use a named numeric vector. See vignette('Introduction_to_bain') for further information")
     }
     # Checken of het factor OF ordered factor is!!!!!!
@@ -207,19 +207,19 @@ bain.lm <-
                estimate <- coef(x)[coef_in_hyp]
                Sigma <- vcov(x)[coef_in_hyp, coef_in_hyp]
              } else{
-               # Hier moeten even de juiste namen meegegeven worden!!!
                ses <- seBeta(
-                 x$model[, -1],
-                 x$model[, 1],
-                 Nobs = nrow(x$model),
+                 predictor[,-1],
+                 dependent,
+                 Nobs = sum(complete.cases(x$model)),
                  alpha = .05,
                  estimator = 'Normal'
                )
-               select_parameters <- match(names(x$model)[-1], names(x$coefficients)[coef_in_hyp])
+               select_parameters <- match(names(x$coefficients)[coef_in_hyp], colnames(predictor)[-1], )
+               #select_parameters <- select_parameters[na.omit(select_parameters)]
                estimate <- ses$CIs$estimate[select_parameters]
-               # Check even of dit lekker loopt!
-               names(estimate) <- names(x$model)[-1][select_parameters]
-               Sigma <- ses$cov.mat[select_parameters, select_parameters]
+               names(estimate) <- colnames(predictor)[-1][select_parameters]
+               Sigma <- ses$cov.mat[select_parameters, select_parameters, drop = FALSE]
+               rownames(Sigma) <- colnames(Sigma) <- names(estimate)
              }
              Args$x <- estimate
              Args$Sigma <- Sigma
@@ -244,11 +244,14 @@ bain.lm <-
 
 
 #' @method bain lavaan
+#' @importFrom lavaan parTable lavInspect
 #' @export
 bain.lavaan <- function(x, hypothesis, fraction = 1, ..., standardize = FALSE) {
   cl <- match.call()
   Args <- as.list(cl[-1])
-
+  if(standardize){
+    if(any(parTable(x)$op == "==")) stop("Cannot yet evaluate hypothesis on standardized model coefficients if there are equality constraints in the model.")
+  }
   num_levels         <- lavInspect(x, what = "nlevels")
   if(grepl("~~", hypothesis)){
     stop("Bain cannot yet handle hypotheses about (co)variance parameters in lavaan models.")
