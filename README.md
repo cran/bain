@@ -1,13 +1,16 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-[![lifecycle](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
+[![lifecycle](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/bain)](https://cran.r-project.org/package=bain)
-[![Build
-Status](https://travis-ci.org/cjvanlissa/bain.svg?branch=master)](https://travis-ci.org/cjvanlissa/bain)
+[![R-CMD-check](https://github.com/cjvanlissa/bain/workflows/R-CMD-check/badge.svg)](https://github.com/cjvanlissa/bain/actions)
 [![](https://cranlogs.r-pkg.org/badges/bain)](https://cran.r-project.org/package=bain)
-<!--[![Codecov test coverage](https://codecov.io/gh/cjvanlissa/bain/branch/master/graph/badge.svg)](https://codecov.io/gh/cjvanlissa/bain?branch=master)-->
+[![test-coverage](https://github.com/cjvanlissa/bain/workflows/test-coverage/badge.svg)](https://github.com/cjvanlissa/bain/actions)
+[![Contributor
+Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](https://www.contributor-covenant.org/version/2/0/code_of_conduct.html)
+[![CII Best
+Practices](https://bestpractices.coreinfrastructure.org/projects/3871/badge)](https://bestpractices.coreinfrastructure.org/projects/3871)
 
 # bain
 
@@ -19,16 +22,27 @@ to the output. A tutorial is available at
 
 ## Installation
 
-Install `bain` from CRAN:
+Install the latest release version of `bain` from CRAN:
 
 ``` r
 install.packages("bain")
 ```
 
+You can also install the latest development version of `bain` from
+GitHub. This requires a working toolchain, to compile the Fortran source
+code. [Step 3 in this
+tutorial](https://cjvanlissa.github.io/worcs/articles/setup.html)
+explains how to set up the toolchain. Then, run:
+
+``` r
+install.packages("devtools")
+devtools::install_github("cjvanlissa/bain")
+```
+
 ## Workflow
 
 Add bain to your existing R workflow, and obtain Bayes factors for your
-familiar R analyses\! Bain is compatible with the pipe operator. Here is
+familiar R analyses! Bain is compatible with the pipe operator. Here is
 an example for testing an informative hypothesis about mean differences
 in an ANOVA:
 
@@ -47,14 +61,45 @@ iris %>%
        Speciessetosa < Speciesversicolor < Speciesvirginica")
 #> Bayesian informative hypothesis testing for an object of class lm (ANOVA):
 #> 
-#>    Fit_eq Com_eq Fit_in Com_in Fit   Com   BF              PMPa  PMPb 
-#> H1 0.000  0.447  1.000  0.500  0.000 0.224 0.000           0.000 0.000
-#> H2 1.000  1.000  1.000  0.165  1.000 0.165 66166997632.868 1.000 0.859
-#> Hu                                                               0.141
+#>    Fit   Com   BF.u  BF.c            PMPa  PMPb 
+#> H1 0.000 0.224 0.000 0.000           0.000 0.000
+#> H2 1.000 0.170 5.889 30472995984.145 1.000 0.855
+#> Hu                                         0.145
 #> 
 #> Hypotheses:
 #>   H1: Speciessetosa<Speciesversicolor=Speciesvirginica
 #>   H2: Speciessetosa<Speciesversicolor<Speciesvirginica
 #> 
-#> Note: BF denotes the Bayes factor of the hypothesis at hand versus its complement.
+#> Note: BF.u denotes the Bayes factor of the hypothesis at hand versus the unconstrained hypothesis Hu. BF.c denotes the Bayes factor of the hypothesis at hand versus its complement.
 ```
+
+## Documentation
+
+Every user-facing function in the package is documented, and the
+documentation can be accessed by running `?function_name` in the R
+console, e.g., `?bain`.
+
+Moreover, you can read the *Introduction to bain* vignette by running
+`vignette("Introduction_to_bain", package = "bain")`
+
+## Citing bain
+
+You can cite the R-package with the following citation:
+
+> Gu, X., Hoijtink, H., Mulder, J., & van Lissa, C. (2019). bain: Bayes
+> factors for informative hypotheses. (Version 0.2.3) \[R package\].
+> <https://CRAN.R-project.org/package=bain>
+
+## Contributing and Contact Information
+
+If you have ideas, please get involved. You can contribute by opening an
+issue on GitHub, or sending a pull request with proposed features.
+Contributions in code must adhere to the [tidyverse style
+guide](https://style.tidyverse.org/).
+
+-   File a GitHub issue [here](https://github.com/cjvanlissa/bain)
+-   Make a pull request [here](https://github.com/cjvanlissa/bain/pulls)
+
+By participating in this project, you agree to abide by the [Contributor
+Code of Conduct
+v2.0](https://www.contributor-covenant.org/version/2/0/code_of_conduct.html).
