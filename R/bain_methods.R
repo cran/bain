@@ -3,11 +3,10 @@
 #' \code{bain} is an acronym for "Bayesian informative hypotheses evaluation".
 #' It uses the Bayes factor to evaluate hypotheses specified using equality and
 #' inequality constraints among (linear combinations of) parameters in a wide
-#' range of statistical models. A tutorial by Hoijtink, Mulder, van Lissa,
-#' and Gu (2018), was published in
-#' \href{https://www.doi.org/10.1037\%2Fmet0000201}{Psychological Methods}.
-#' The preprint of that tutorial is available at
-#' \href{https://psyarxiv.com/v3shc/}{DOI:10.31234/osf.io/v3shc}, or on the bain
+#' range of statistical models. A \strong{tutorial} by Hoijtink, Mulder, van Lissa,
+#' and Gu (2018), was published in Psychological Methods.
+#' The preprint of that tutorial is available on PsyArxiv
+#' (\doi{10.31234/osf.io/v3shc}) or on the bain
 #' website at
 #' \url{https://informative-hypotheses.sites.uu.nl/software/bain/}
 #' \strong{Users are
@@ -22,9 +21,10 @@
 #' @param hypothesis	A character string containing the informative hypotheses
 #' to evaluate. See the vignette for elaborations.
 #' @param fraction A number representing the fraction of information
-#' in the data used to construct the prior distribution
-#' (see the tutorial DOI: 10.1037/met0000201): The default value 1 denotes the
-#' minimal fraction, 2 denotes twice the minimal fraction, etc.
+#' in the data used to construct the prior distribution.
+#' The default value 1 denotes the
+#' minimal fraction, 2 denotes twice the minimal fraction, etc. See the
+#' vignette for elaborations.
 #' @param ... Additional arguments. See the vignette for elaborations.
 #'
 #' @return The main output resulting from analyses with \code{bain} are
@@ -33,24 +33,47 @@
 #' \strong{vignette} for further elaborations.
 #'
 #' @author The main authors of the bain package are Xin Gu, Caspar
-#' van Lissa, Herbert Hoijtink and Joris Mulder. Contributions
-#' were made by Marlyne Bosman and Camiel van Zundert.
-#' Contact information can be
-#' found on the bain website at
+#' van Lissa, Herbert Hoijtink and Joris Mulder with smaller contributions
+#' by Marlyne Bosman, Camiel van Zundert, and Fayette Klaassen.
+#' Contact information can be found on the bain website at
 #' \url{https://informative-hypotheses.sites.uu.nl/software/bain/}
 #'
-#' @references See the vignette for additional references.
+#' @references
+#' For a tutorial on this method, see:
 #'
-#' Hoijtink, H., Mulder, J., van Lissa, C., and Gu, X. (2018). A tutorial on
-#' testing hypotheses using the Bayes factor. \emph{Psychological Methods.}
-#' DOI: 10.1037/met0000201
+#' Hoijtink, H., Mulder, J., van Lissa, C., & Gu, X. (2019). A tutorial on
+#' testing hypotheses using the Bayes factor. *Psychological methods, 24*(5),
+#' 539. \doi{10.31234/osf.io/v3shc}
 #'
+#' For applications in structural equation modeling, see:
+#'
+#' Van Lissa, C. J., Gu, X., Mulder, J., Rosseel, Y., Van Zundert, C., &
+#' Hoijtink, H. (2021). Teacher’s corner: Evaluating informative hypotheses
+#' using the Bayes factor in structural equation models.
+#' *Structural Equation Modeling: A Multidisciplinary Journal, 28*(2), 292-301.
+#' \doi{10.1080/10705511.2020.1745644}.
+#'
+#' For the statistical underpinnings, see:
+#'
+#' Gu, Mulder, and Hoijtink (2018). Approximated adjusted fractional Bayes
+#' factors: A general method for testing informative hypotheses.
+#' *British Journal of Mathematical and Statistical Psychology, 71*(2), 229-261.
+#' \doi{10.1111/bmsp.12110}.
+#'
+#' Hoijtink, H., Gu, X., & Mulder, J. (2019). Bayesian evaluation of informative
+#' hypotheses for multiple populations.
+#' *British Journal of Mathematical and Statistical Psychology, 72*(2), 219-243.
+#' \doi{10.1111/bmsp.12145}.
+#'
+#' Hoijtink, H., Gu, X., Mulder, J., & Rosseel, Y. (2019). Computing Bayes
+#' factors from data with missing values. *Psychological Methods, 24*(2), 253.
+#' \doi{10.31234/osf.io/q6h5w}
 #' @examples
-#' # USING BAIN WITH A LM OBJECT: Bayesian ANOVA
+#' # Evaluation of informative hypotheses for an ANOVA
 #' # make a factor of variable site
 #' sesamesim$site <- as.factor(sesamesim$site)
 #' # execute an analysis of variance using lm() which, due to the -1, returns
-#' # estimates of the means per group
+#' # estimates of the means of postnumb per group
 #' anov <- lm(postnumb~site-1,sesamesim)
 #' # take a look at the estimated means and their names
 #' coef(anov)
@@ -60,36 +83,6 @@
 #' results <- bain(anov, "site1=site2=site3=site4=site5; site2>site5>site1>
 #' site3>site4")
 #' #
-#' # USING BAIN WITH A NAMED VECTOR: Bayesian ANOVA
-#'
-#' # make a factor of variable site
-#' sesamesim$site <- as.factor(sesamesim$site)
-#' # execute an analysis of variance using lm() which, due to the -1, returns
-#' # estimates of the means per group
-#' anov <- lm(postnumb~site-1,sesamesim)
-#' # collect the estimates means in a vector
-#' estimate <- coef(anov)
-#' # give names to the estimates in anov
-#' names(estimate) <- c("site1", "site2", "site3","site4","site5")
-#' # create a vector containing the sample sizes of each group
-#' ngroup <- table(sesamesim$site)
-#' # compute the variance of the means and collect them in a list
-#' var <- summary(anov)$sigma**2
-#' cov1 <- matrix(var/ngroup[1], nrow=1, ncol=1)
-#' cov2 <- matrix(var/ngroup[2], nrow=1, ncol=1)
-#' cov3 <- matrix(var/ngroup[3], nrow=1, ncol=1)
-#' cov4 <- matrix(var/ngroup[4], nrow=1, ncol=1)
-#' cov5 <- matrix(var/ngroup[5], nrow=1, ncol=1)
-#' covlist <- list(cov1, cov2, cov3, cov4,cov5)
-#' # set a seed value
-#' set.seed(100)
-#' # test hypotheses with bain. Note that there are multiple groups
-#' # characterized by one mean, therefore group_parameters=1. Note that
-#' # there are no joint parameters, therefore, joint_parameters=0.
-#' results <- bain(estimate,
-#' "site1=site2=site3=site4=site5; site2>site5>site1>site3>site4",
-#' n=ngroup,Sigma=covlist,group_parameters=1,joint_parameters = 0)
-#'
 #' # SEE THE TUTORIAL AND VIGNETTE FOR MANY ADDITIONAL EXAMPLES
 #'
 #'
@@ -98,10 +91,30 @@
 #' @useDynLib bain, .registration = TRUE
 #' @importFrom stats as.formula coef complete.cases cov lm model.frame
 #' model.matrix pt qt sd setNames summary.lm var vcov
-#'
+#' @md
 bain <- function(x, hypothesis, fraction = 1, ...) {
   UseMethod("bain", x)
 }
+
+# Herbert has applied the following changes to bain_methods:
+# 1. The calls to lm, t_test, lavaan, and default have an extra parameter
+#    gocomplement that by default is true. This parameter is needed because
+#    in complement2.R a call to bain is implemented which makes bain "recursive"
+#    in complement2.R gocomplement is set to FALSE to create an exit from
+#    the recursive algorithm.
+# 2. gocomplement is added to the bain output object. When PMPcomplement
+#    which is contained in complement2.R is called, it is set to FALSE
+# 3. a call to PMPcomplement from complement2.R has been added
+#    that computes the fit and complexity
+#    of the complement of all the hypotheses under consideration, adds a row and
+#    a column to the bain output object, and removes gocomplement from the
+#    bain output object.
+# 4. Note that, Bain.print.R has been modified such that the row and column
+#    added to the bain output object are nicely printed. Also an extra table
+#    label has been added if the complexity of "the complement of all
+#    hypotheses" is smaller than .05.
+# 5. gocomplement is added to the output object Bainres. After calling
+#    PMPcomplement it is removed again.
 
 
 #' @method bain lm
@@ -111,9 +124,13 @@ bain.lm <-
            hypothesis,
            fraction = 1,
            ...,
-           standardize = FALSE) {
+          standardize = FALSE,
+          gocomplement = TRUE) {    # gocomplement is the exit for the
+                                    # recursive use of bain when calling
+                                    # PMPcomplement at the end of bain_methods
     cl <- match.call()
     Args <- as.list(cl[-1])
+
     if(!("numeric" %in% class(x$coefficients)) | !is.null(dim(x$coefficients))){
       stop("It appears that you are trying to run a multivariate linear model. This cannot be done using a lm() object as input for bain. Instead use a named numeric vector. See vignette('Introduction_to_bain') for further information")
     }
@@ -246,7 +263,8 @@ bain.lm <-
 #' @method bain lavaan
 #' @importFrom lavaan parTable lavInspect
 #' @export
-bain.lavaan <- function(x, hypothesis, fraction = 1, ..., standardize = FALSE) {
+bain.lavaan <- function(x, hypothesis, fraction = 1, ..., standardize = FALSE,
+                        gocomplement = TRUE) {
   cl <- match.call()
   Args <- as.list(cl[-1])
   if(standardize){
@@ -288,7 +306,8 @@ bain.htest <-
   function(x,
            hypothesis,
            fraction = 1,
-           ...) {
+           ...,
+           gocomplement = TRUE) {
     stop("The standard t.test() function from the 'stats' package does not return variance and sample size, which are required to run bain. Please use the function t_test() from the 'bain' package instead. It accepts the same arguments.")
 }
 
@@ -342,7 +361,8 @@ bain.default <- function(x,
                          n,
                          Sigma,
                          group_parameters = 0,
-                         joint_parameters = 0
+                         joint_parameters = 0,
+                         gocomplement = TRUE
                          )
 {
 
@@ -687,8 +707,18 @@ evaluated, OR, one of your hypotheses is impossible. See the vignette
     n = as.vector(n),
     Sigma = Sigma,
     group_parameters = group_parameters,
-    joint_parameters = joint_parameters
+    joint_parameters = joint_parameters,
+    gocomplement = gocomplement
   )
+
+# gocomplement is added to avoid an eternal loop caused by calling
+# bain from within bain. gocomplement is the exit for this
+# recursive use of bain. Below the call to PMPcomplement that adds
+# an extra row and column to the bain output object.
+
+  if (Bainres$gocomplement == TRUE){
+  Bainres <- PMPcomplement(results = Bainres)}
+
   class(Bainres) <- "bain"
   Bainres
 }

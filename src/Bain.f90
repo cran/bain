@@ -511,7 +511,8 @@ Num(k)=N
 end if
 
 f_or_c=product(df_or_dc)
-Numfc=sum(Num)
+!Numfc=sum(Num) to repair the large integer replaced by the line below
+Numfc = 10
 
 end do
 

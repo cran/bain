@@ -13,11 +13,9 @@ knitr::opts_chunk$set(
 #  y<-sesamesim$postnumb[which(sesamesim$sex==2)]
 #  # execute student's t-test
 #  ttest <- t_test(x,y,paired = FALSE, var.equal = TRUE)
-#  # Check the names of the estimates
-#  coef(ttest)
 #  # set a seed value
 #  set.seed(100)
-#  # test hypotheses with bain
+#  # test hypotheses with bain. The names of the means are x and y.
 #  results <- bain(ttest, "x = y; x > y; x < y")
 #  # display the results
 #  results
@@ -33,11 +31,9 @@ knitr::opts_chunk$set(
 #  y<-sesamesim$postnumb[which(sesamesim$sex==2)]
 #  # execute student's t-test
 #  ttest <- t_test(x,y,paired = FALSE, var.equal = FALSE)
-#  # Check the names of the coefficients
-#  coef(ttest)
 #  # set a seed value
 #  set.seed(100)
-#  # test hypotheses with bain
+#  # test hypotheses with bain. The names of the means are x and y.
 #  results <- bain(ttest, "x = y; x > y; x < y")
 #  # display the results
 #  print(results)
@@ -49,11 +45,9 @@ knitr::opts_chunk$set(
 #  library(bain)
 #  # compare the pre with the post measurements
 #  ttest <- t_test(sesamesim$prenumb,sesamesim$postnumb,paired = TRUE)
-#  # Check name of the coefficient
-#  coef(ttest)
 #  # set a seed value
 #  set.seed(100)
-#  # test hypotheses with bain
+#  # test hypotheses with bain. Use difference to refer to the difference between means
 #  results <- bain(ttest, "difference=0; difference>0; difference<0")
 #  # display the results
 #  print(results)
@@ -66,10 +60,8 @@ knitr::opts_chunk$set(
 #  # compare post measurements with the reference value 30
 #  ttest <- t_test(sesamesim$postnumb)
 #  # Check name of estimate
-#  coef(ttest)
-#  # set a seed value
 #  set.seed(100)
-#  # test hypotheses with bain versus the reference value 30
+#  # test hypotheses with bain versus the reference value 30. Use x to refer to the mean
 #  results <- bain(ttest, "x=30; x>30; x<30")
 #  # display the results
 #  print(results)
@@ -85,8 +77,6 @@ knitr::opts_chunk$set(
 #  y<-sesamesim$postnumb[which(sesamesim$sex==2)]
 #  # execute student's t-test
 #  ttest <- t_test(x,y,paired = FALSE, var.equal = TRUE)
-#  # Check the names of the estimates
-#  coef(ttest)
 #  # compute the pooled within standard deviation using the variance of x
 #  # (ttest$v[1]) and y (ttest$v[2])
 #  pwsd <- sqrt(((length(x) -1) * ttest$v[1] + (length(y)-1) * ttest$v[2])/
@@ -100,6 +90,7 @@ knitr::opts_chunk$set(
 #  # 2.52 VERSUS the means differ more than .2 * pwsd = 2.52) with bain
 #  # note that, .2 is a value for Cohen's d reflecting a "small" effect, that
 #  # is, the means differ less or more than .2 pwsd.
+#  # use x and y to refer to the means.
 #  results <- bain(ttest, "x - y > -2.52 & x - y < 2.52")
 #  # display the results
 #  print(results)
@@ -209,6 +200,83 @@ knitr::opts_chunk$set(
 #  results3 <- bain(anov, "site1=site2=site3=site4=site5; site2>site5>site1>
 #  site3>site4",fraction = 3)
 #  print(results3)
+
+## ----ttest_ex20, eval=FALSE---------------------------------------------------
+#  # load the bain package which includes the simulated sesamesim data set
+#  library(bain)
+#  
+#  # load mice (multiple imputation of missing data)
+#  # inspect the mice help file to obtain further information
+#  library(mice)
+#  
+#  # create missing values in four variables from the sesamesim data set
+#  misdat <- cbind(sesamesim$prenumb,sesamesim$postnumb,sesamesim$funumb,sesamesim$peabody)
+#  colnames(misdat) <- c("prenumb","postnumb","funumb","peabody")
+#  misdat <- as.data.frame(misdat)
+#  
+#  set.seed(1)
+#  pmis <- .80
+#  #
+#  for (i in 1:240){
+#    uni<-runif(1)
+#    if (pmis < uni) {
+#      misdat$funumb[i]<-NA
+#    }
+#    uni<-runif(1)
+#    if (pmis < uni) {
+#      misdat$prenumb[i]<-NA
+#      misdat$postnumb[i]<-NA
+#    }
+#    uni<-runif(1)
+#    if (pmis < uni) {
+#      misdat$peabody[i]<-NA
+#    }
+#  }
+#  # print data summaries - note the missing values (NAs)
+#  summary(misdat)
+#  
+#  # use mice to create 1000 imputed data matrices. Note that, the approach used
+#  # below # is only one manner in which mice can be instructed. Many other
+#  # options are available.
+#  M <- 1000
+#  out <- mice(data = misdat, m = M, seed=999, meth=c("norm","norm","norm","norm"), diagnostics = FALSE, printFlag = FALSE)
+#  
+#  # create vectors in which 1000 fits and complexities can be stored for each
+#  # of two hypotheses and their complement
+#  fits1 <- vector("numeric",1000)
+#  compls1 <- vector("numeric",1000)
+#  fits2 <- vector("numeric",1000)
+#  compls2 <- vector("numeric",1000)
+#  fitscomplement <- vector("numeric",1000)
+#  complscomplement <- vector("numeric",1000)
+#  
+#  # analyse each imputed data set with lm and bain, store the resulting
+#  # fits and complexities
+#  set.seed(100)
+#  for(i in 1:M) {
+#  regr <- lm(funumb~prenumb+postnumb,complete(out,i))
+#  result <- bain(regr,"prenumb=0 & postnumb=0;prenumb>0 & postnumb>0")
+#  fits1[i]<-result$fit$Fit[1]
+#  compls1[i]<-result$fit$Com[1]
+#  fits2[i]<-result$fit$Fit[2]
+#  compls2[i]<-result$fit$Com[2]
+#  fitscomplement[i]<-result$fit$Fit[4]
+#  complscomplement[i]<-result$fit$Com[4]
+#  }
+#  
+#  # compute the Bayes factor from the imputed fits and complexities
+#  # see Equation 23 in Hoijtink, H., Gu, X., Mulder, J., and Rosseel, Y. (2019).
+#  # Computing Bayes Factors from Data with Missing Values.
+#  # Psychological Methods, 24, 253-268.
+#  
+#  BF1u <- sum(fits1)/sum(compls1)
+#  BF2u <- sum(fits2)/sum(compls2)
+#  BFcomplementu <- sum(fitscomplement)/sum(complscomplement)
+#  
+#  # compute PMPc
+#  PMPcH1 <- BF1u/(BF1u + BF2u + BFcomplementu)
+#  PMPcH2 <- BF2u/(BF1u + BF2u + BFcomplementu)
+#  PMPcHcomplement <- BFcomplementu/(BF1u + BF2u + BFcomplementu)
 
 ## ----ttest_ex10, eval=FALSE---------------------------------------------------
 #  # Load the bain and lavaan libraries. Visit www.lavaan.org for
@@ -330,6 +398,90 @@ knitr::opts_chunk$set(
 #  results <- bain(estimate,
 #  "site1=site2=site3=site4=site5; site2>site5>site1>site3>site4",
 #  n=ngroup,Sigma=covlist,group_parameters=1,joint_parameters = 0)
+#  # display the results
+#  print(results)
+#  # obtain the descriptives table
+#  summary(results, ci = 0.95)
+
+## ----ttest_ex21, eval=FALSE---------------------------------------------------
+#  # Load the bain library
+#  library(bain)
+#  
+#  # make a factor of variable site
+#  sesamesim$site <- as.factor(sesamesim$site)
+#  
+#  # collect the estimated means in a vector
+#  estimates <- aggregate(sesamesim$postnumb,list(sesamesim$site),mean)[,2]
+#  # give names to the estimates
+#  names(estimates) <- c("site1", "site2", "site3","site4","site5")
+#  
+#  # create a vector containing the sample sizes of each group
+#  ngroup <- table(sesamesim$site)
+#  
+#  # compute the variances in each group and subquently the squared standard errors
+#  vars <- aggregate(sesamesim$postnumb,list(sesamesim$site),var)
+#  vargroup <- vars[,2]/ngroup
+#  
+#  # collect the variances of the means in a covariance listcov1 <- matrix(vargroup[1], nrow=1, ncol=1)
+#  cov2 <- matrix(vargroup[2], nrow=1, ncol=1)
+#  cov3 <- matrix(vargroup[3], nrow=1, ncol=1)
+#  cov4 <- matrix(vargroup[4], nrow=1, ncol=1)
+#  cov5 <- matrix(vargroup[5], nrow=1, ncol=1)
+#  covlist <- list(cov1, cov2, cov3, cov4,cov5)
+#  
+#  # set a seed value
+#  set.seed(100)
+#  # test hypotheses using bain. Note that there are multiple groups
+#  # characterized by one mean, therefore group_parameters=1. Note that
+#  # there are no joint parameters, therefore, joint_parameters=0.
+#  results <- bain(estimates,
+#                  "site1=site2=site3=site4=site5;site2>site5>site1>site4>site3",
+#                  n=ngroup,Sigma=covlist,group_parameters=1,joint_parameters = 0)
+#  print(results)
+#  
+#  # obtain the descriptives table
+#  summary(results, ci = 0.95)
+
+## ----ttest_ex19, eval=FALSE---------------------------------------------------
+#  # load the bain package which includes the simulated sesamesim data set
+#  library(bain)
+#  # load the WRS2 package which renders the trimmed sample mean and
+#  # corresponding standard error
+#  library(WRS2)
+#  # make a factor of variable site
+#  sesamesim$site <- as.factor(sesamesim$site)
+#  # create a vector containing the sample sizes of each group
+#  # (in case of missing values in the variables used, the command
+#  # below has to be modified such that only the cases without
+#  # missing values are counted)
+#  ngroup <- table(sesamesim$site)
+#  # Compute the 20\% sample trimmed mean for each site
+#  estimates <- c(mean(sesamesim$postnumb[sesamesim$site == 1], tr = 0.2),
+#                 mean(sesamesim$postnumb[sesamesim$site == 2], tr = 0.2),
+#                 mean(sesamesim$postnumb[sesamesim$site == 3], tr = 0.2),
+#                 mean(sesamesim$postnumb[sesamesim$site == 4], tr = 0.2),
+#                 mean(sesamesim$postnumb[sesamesim$site == 5], tr = 0.2))
+#  # give names to the estimates
+#  names(estimates) <- c("s1", "s2", "s3","s4","s5")
+#  # display the estimates and their names
+#  print(estimates)
+#  # Compute the sample trimmed mean standard error for each site
+#  se <- c(trimse(sesamesim$postnumb[sesamesim$site == 1]),
+#          trimse(sesamesim$postnumb[sesamesim$site == 2]),
+#          trimse(sesamesim$postnumb[sesamesim$site == 3]),
+#          trimse(sesamesim$postnumb[sesamesim$site == 4]),
+#          trimse(sesamesim$postnumb[sesamesim$site == 5]))
+#  # Square the standard errors to obtain the variances of the sample
+#  # trimmed means
+#  var <- se^2
+#  # Store the variances in a list of matrices
+#  covlist <- list(matrix(var[1]),matrix(var[2]),
+#  matrix(var[3]),matrix(var[4]), matrix(var[5]))
+#  # set a seed value
+#  set.seed(100)
+#  # test hypotheses with bain
+#  results <- bain(estimates,"s1=s2=s3=s4=s5;s2>s5>s1>s3>s4",
+#  n=ngroup,Sigma=covlist,group_parameters=1,joint_parameters= 0)
 #  # display the results
 #  print(results)
 #  # obtain the descriptives table
@@ -614,191 +766,59 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results, ci = 0.95)
 
-## ----ttest_ex19, eval=FALSE---------------------------------------------------
-#  # load the bain package which includes the simulated sesamesim data set
+## ---- eval = FALSE------------------------------------------------------------
 #  library(bain)
-#  # load the WRS2 package which renders the trimmed sample mean and
-#  # corresponding standard error
-#  library(WRS2)
-#  # make a factor of variable site
-#  sesamesim$site <- as.factor(sesamesim$site)
-#  # create a vector containing the sample sizes of each group
-#  # (in case of missing values in the variables used, the command
-#  # below has to be modified such that only the cases without
-#  # missing values are counted)
-#  ngroup <- table(sesamesim$site)
-#  # Compute the 20\% sample trimmed mean for each site
-#  estimates <- c(mean(sesamesim$postnumb[sesamesim$site == 1], tr = 0.2),
-#                 mean(sesamesim$postnumb[sesamesim$site == 2], tr = 0.2),
-#                 mean(sesamesim$postnumb[sesamesim$site == 3], tr = 0.2),
-#                 mean(sesamesim$postnumb[sesamesim$site == 4], tr = 0.2),
-#                 mean(sesamesim$postnumb[sesamesim$site == 5], tr = 0.2))
-#  # give names to the estimates
-#  names(estimates) <- c("s1", "s2", "s3","s4","s5")
-#  # display the estimates and their names
-#  print(estimates)
-#  # Compute the sample trimmed mean standard error for each site
-#  se <- c(trimse(sesamesim$postnumb[sesamesim$site == 1]),
-#          trimse(sesamesim$postnumb[sesamesim$site == 2]),
-#          trimse(sesamesim$postnumb[sesamesim$site == 3]),
-#          trimse(sesamesim$postnumb[sesamesim$site == 4]),
-#          trimse(sesamesim$postnumb[sesamesim$site == 5]))
-#  # Square the standard errors to obtain the variances of the sample
-#  # trimmed means
-#  var <- se^2
-#  # Store the variances in a list of matrices
-#  covlist <- list(matrix(var[1]),matrix(var[2]),
-#  matrix(var[3]),matrix(var[4]), matrix(var[5]))
-#  # set a seed value
-#  set.seed(100)
-#  # test hypotheses with bain
-#  results <- bain(estimates,"s1=s2=s3=s4=s5;s2>s5>s1>s3>s4",
-#  n=ngroup,Sigma=covlist,group_parameters=1,joint_parameters= 0)
-#  # display the results
-#  print(results)
-#  # obtain the descriptives table
-#  summary(results, ci = 0.95)
+#  library(lavaan)
+#  model1 <- 'A =~ Ab + Al + Af + An + Ar + Ac
+#             B =~ Bb + Bl + Bf + Bn + Br + Bc'
+#  fit1 <- sem(model1, data = sesamesim, std.lv = TRUE)
 
-## ----ttest_ex20, eval=FALSE---------------------------------------------------
-#  # load the bain package which includes the simulated sesamesim data set
-#  library(bain)
-#  # load the mice (multiple imputation of missing data), psych
-#  # (provides access to the describe function), and MASS libraries -
-#  # inspect the mice help file to obtain further information
-#  # - also surf to http://www.stefvanbuuren.nl/mi/MICE.html to obtain
-#  # further information and references for mice.
-#  library(mice)
-#  library(psych)
-#  library(MASS)
-#  sesamesim <- cbind(sesamesim$prenumb,sesamesim$postnumb,sesamesim$funumb,sesamesim$peabody)
-#  colnames(sesamesim) <- c("prenumb","postnumb","funumb","peabody")
-#  sesamesim <- as.data.frame(sesamesim)
-#  # this examples is based on the prenumb, postnumb, funumb and peabody
-#  # variables in the sesamesim data set. First of all, missing data are
-#  # created in these four variables.
-#  #
-#  set.seed(1)
-#  pmis1<-1
-#  pmis2<-1
-#  pmis3<-1
-#  #
-#  for (i in 1:240){
-#    pmis1[i] <- .80
-#    pmis2[i]<- .80
-#    pmis3[i]<- .80
-#  #
-#    uni<-runif(1)
-#    if (pmis1[i] < uni) {
-#      sesamesim$funumb[i]<-NaN
-#    }
-#    uni<-runif(1)
-#    if (pmis2[i] < uni) {
-#      sesamesim$prenumb[i]<-NaN
-#      sesamesim$postnumb[i]<-NaN
-#    }
-#    uni<-runif(1)
-#    if (pmis3[i] < uni) {
-#      sesamesim$peabody[i]<-NaN
-#    }
-#  }
-#  # print data summaries - note that due to missing valus the n per variable is smaller than 240
-#  print(describe(sesamesim))
-#  # use mice to create 1000 imputed data matrices. Note that, the approach used below
-#  # is only one manner in which mice can be instructed. Many other options are available.
-#  M <- 1000
-#  out <- mice(data = sesamesim, m = M, seed=999, meth=c("norm","norm","norm","norm"), diagnostics = FALSE, printFlag = FALSE)
-#  # create matrices in which 1000 vectors with estimates can be stored and in which a covariance matrix can be stored
-#  mulest <- matrix(0,nrow=1000,ncol=2)
-#  covwithin <- matrix(0,nrow=2,ncol=2)
-#  # execute 1000 multiple regressions using the imputed data matrices and store the estimates
-#  # of only the regression coefficients of funumb on prenumb and postnumband and the average
-#  # of the 1000 covariance matrices.
-#  # See Hoijtink, Gu, Mulder, and Rosseel (2019) for an explanation of the latter.
-#  for(i in 1:M) {
-#  mulres <- lm(funumb~prenumb+postnumb,complete(out,i))
-#  mulest[i,]<-coef(mulres)[2:3]
-#  covwithin<-covwithin + 1/M * vcov(mulres)[2:3,2:3]
-#  }
-#  # Compute the average of the estimates and assign names, the between and total covariance matrix.
-#  # See Hoijtink, Gu, Mulder, and Rosseel (2019) for an explanation.
-#  estimates <- colMeans(mulest)
-#  names(estimates) <- c("prenumb", "postnumb")
-#  covbetween <- cov(mulest)
-#  covariance <- covwithin + (1+1/M)*covbetween
-#  # determine the sample size
-#  samp <- nrow(sesamesim)
-#  # compute the effective sample size
-#  # See Hoijtink, Gu, Mulder, and Rosseel (2019) for an explanation.
-#  nucom<-samp-length(estimates)
-#  lam <- (1+1/M)*(1/length(estimates))* sum(diag(covbetween %*% ginv(covariance)))
-#  nuold<-(M-1)/(lam^2)
-#  nuobs<-(nucom+1)/(nucom+3)*nucom*(1-lam)
-#  nu<- nuold*nuobs/(nuold+nuobs)
-#  fracmis <- (nu+1)/(nu+3)*lam + 2/(nu+3)
-#  neff<-samp-samp*fracmis
-#  covariance<-list(covariance)
-#  # set the seed
-#  set.seed(100)
-#  # test hypotheses with bain
-#  results <- bain(estimates,"prenumb=postnumb=0",n=neff,Sigma=covariance,group_parameters=2,joint_parameters = 0)
-#  # display the results
-#  print(results)
-#  # obtain the descriptives table
-#  summary(results, ci = 0.95)
+## ---- eval = FALSE------------------------------------------------------------
+#  hypotheses <- "(Ab, Al, Af, An, Ar, Ac) >.6 &
+#                 (Bb, Bl, Bf, Bn, Br, Bc) >.6"
 
-## ---- eval = TRUE, echo = TRUE, results='hide', message=FALSE, warning=FALSE----
-library(bain)
-library(lavaan)
-model1 <- 'A =~ Ab + Al + Af + An + Ar + Ac 
-           B =~ Bb + Bl + Bf + Bn + Br + Bc'
-fit1 <- sem(model1, data = sesamesim, std.lv = TRUE)
+## ---- eval = FALSE------------------------------------------------------------
+#  # Extract standardized parameter estimates (argument x)
+#  PE1 <- parameterEstimates(fit1, standardized = TRUE)
+#  # Identify which parameter estimates are factor loadings
+#  loadings <- which(PE1$op == "=~")
+#  # Collect the standardized "std.all" factor loadings "=~"
+#  estimates <- PE1$std.all[loadings]
+#  # Assign names to the standardized factor loadings
+#  names(estimates) <- c("Ab", "Al", "Af", "An", "Ar", "Ac",
+#                        "Bb", "Bl", "Bf", "Bn", "Br", "Bc")
+#  
+#  # Extract sample size (argument n)
+#  n <- nobs(fit1)
+#  
+#  # Extract the standardized model parameter covariance matrix,
+#  # selecting only the rows and columns for the loadings
+#  covariance <- lavInspect(fit1, "vcov.std.all")[loadings, loadings]
+#  
+#  # Give the covariance matrix the same names as the estimate
+#  dimnames(covariance) <- list(names(estimates), names(estimates))
+#  
+#  # Put the covariance matrix in a list
+#  covariance <- list(covariance)
+#  
+#  # Specify number of group parameters; this simply means that there
+#  # are 12 parameters in the estimate.
+#  group_parameters <- 12
+#  
+#  # Then, the number of joint parameters. This is always 0 for evaluations of
+#  # SEM hypotheses:
+#  joint_parameters <- 0
 
-## ----eval = TRUE, echo = TRUE-------------------------------------------------
-hypotheses <- "(Ab, Al, Af, An, Ar, Ac) >.6 &
-               (Bb, Bl, Bf, Bn, Br, Bc) >.6"
+## ---- eval = FALSE------------------------------------------------------------
+#  res <- bain(x = estimates,
+#              hypothesis = hypotheses,
+#              n = n,
+#              Sigma = covariance,
+#              group_parameters = group_parameters,
+#              joint_parameters = joint_parameters)
+#  res
 
-## -----------------------------------------------------------------------------
-# Extract standardized parameter estimates (argument x)
-PE1 <- parameterEstimates(fit1, standardized = TRUE)
-# Identify which parameter estimates are factor loadings
-loadings <- which(PE1$op == "=~")
-# Collect the standardized "std.all" factor loadings "=~"
-estimates <- PE1$std.all[loadings]
-# Assign names to the standardized factor loadings
-names(estimates) <- c("Ab", "Al", "Af", "An", "Ar", "Ac", 
-                      "Bb", "Bl", "Bf", "Bn", "Br", "Bc")
-
-# Extract sample size (argument n)
-n <- nobs(fit1)
-
-# Extract the standardized model parameter covariance matrix,
-# selecting only the rows and columns for the loadings
-covariance <- lavInspect(fit1, "vcov.std.all")[loadings, loadings]
-
-# Give the covariance matrix the same names as the estimate
-dimnames(covariance) <- list(names(estimates), names(estimates))
-
-# Put the covariance matrix in a list
-covariance <- list(covariance)
-
-# Specify number of group parameters; this simply means that there 
-# are 12 parameters in the estimate.
-group_parameters <- 12
-
-# Then, the number of joint parameters. This is always 0 for evaluations of
-# SEM hypotheses:
-joint_parameters <- 0
-
-## -----------------------------------------------------------------------------
-res <- bain(x = estimates,
-            hypothesis = hypotheses,
-            n = n,
-            Sigma = covariance,
-            group_parameters = group_parameters,
-            joint_parameters = joint_parameters)
-res
-
-## -----------------------------------------------------------------------------
-sres <- summary(res, ci = 0.95)
-sres
+## ---- eval = FALSE------------------------------------------------------------
+#  sres <- summary(res, ci = 0.95)
+#  sres
 
