@@ -1,4 +1,4 @@
-84c37756a4355c8dca33da99aead7e07 *DESCRIPTION
+ac24c7ef2cd576863e106d8baa80f678 *DESCRIPTION
 bbc956f3b6d24cd3401a24bbcb58a5fe *NAMESPACE
 9c6b1f565d2bc247aa162626f64f5362 *R/Bain.print.R
 81051bcc2cf1bedf378224b0a93e2877 *R/bain-package.R
@@ -18,7 +18,7 @@ f5fcb7b2b1c7cd0e831c03abdebee016 *R/sesamesim.R
 b7859c174a8697bdfd2b507c9bc5ead2 *R/synthetic_nl.R
 969564fdb4eb910cbc2c0936424339c3 *R/synthetic_us.R
 d3751377816ac750c3a6c9939c5486e1 *R/t.test.default.R
-213e2393dae92a388a3b3c2bdec5fa78 *R/t_test_wrapper.R
+bf6aed84bdc6f2d7b63f768490fe6d6b *R/t_test_wrapper.R
 5598983f789a765eb7d011a9d71307cc *README.md
 f01682ffd9d5582c0d3b8a226f3c2b16 *build/partial.rdb
 4d14cf0e1ff464479df21cc1fbb64f2c *build/vignette.rds
@@ -26,9 +26,9 @@ f01682ffd9d5582c0d3b8a226f3c2b16 *build/partial.rdb
 210f05acf3a90099e8144dfd9df7916b *data/synthetic_dk.csv
 61268a2ec690bb2ff608a17231996b87 *data/synthetic_nl.csv
 7fc9382dc0af17e9ef4706f5719374d4 *data/synthetic_us.csv
-f0f72e6db37ee94e4f3e13bb25e35504 *inst/doc/Introduction_to_bain.R
-92ffd16424fe53ceef492073de45b7df *inst/doc/Introduction_to_bain.Rmd
-5eb8920c9481a56101001e74edecdcd5 *inst/doc/Introduction_to_bain.html
+1d47539d0b7166da888bf26d5706d9ba *inst/doc/Introduction_to_bain.R
+92ee7b4f17fa859b3af2c2f927d59566 *inst/doc/Introduction_to_bain.Rmd
+7b6cee797e8699213aa40952d977bcb5 *inst/doc/Introduction_to_bain.html
 77a00248b2beb576d1f6bd94db167e5d *inst/extdata/sesameCFA.csv
 d1ffc510a947f4ada2847128a5e09cdc *inst/extdata/sesamesim.csv
 a53055c5f5994b8171a44795284adf82 *man/bain.Rd
@@ -48,8 +48,8 @@ ff6fe469b044f5fd884f2f70d2228124 *man/seBeta.Rd
 e390e43cd88a93c070ee87d034e51954 *man/synthetic_dk.Rd
 4ce889b797b650add5becdbe34ee4b1d *man/synthetic_nl.Rd
 b364f9951de373ff4cbb3c6ba2f40d77 *man/synthetic_us.Rd
-619ececddf393cfaada23024e4b24ac0 *man/t_test.Rd
-656bb992dfa91cd16a16cf6e0502f461 *src/Bain.f90
+95079e9871580d0862d9b22a22d059ed *man/t_test.Rd
+de6d79ec14b2b307f0bef1dd82eeffa2 *src/Bain.f90
 f08557aba428912b38c7c9565d9b0d11 *src/bain_init.c
 5c07eded6a5c68098fa16ca98f32a514 *tests/testthat.R
 8936b63a28fd4ebfaafc95f83a1a787a *tests/testthat/test-J.R
@@ -58,7 +58,7 @@ f08557aba428912b38c7c9565d9b0d11 *src/bain_init.c
 4bd68c31512a755d67b336bdaebe8537 *tests/testthat/test-bain_lm_standardized_bug.R
 40bf0d855405d6426c5c7f772e6bac11 *tests/testthat/test-bain_sensitivity.R
 5a051e5ebe7f228668c23046f797778f *tests/testthat/test-baindefault.R
-b779772fe5b0cef7c822b861c594c92f *tests/testthat/test-complement.R
+3fc68a61950c70c186aaaadfeb9935ae *tests/testthat/test-complement.R
 87e51e6b18c31176103c568c0c16611b *tests/testthat/test-debugExample1_lavaan_cfa.R
 e3cca463f701c3e5f4115c13bcc049c8 *tests/testthat/test-extra-bug.R
 3aeb646ab9cfa044074d27fdc7dd8ba2 *tests/testthat/test-extra.R
@@ -72,11 +72,11 @@ e829b02463ebde13cab417fe4948e93e *tests/testthat/test-lavaan_fraction.R
 6fe3df6dc2fa7a28a1054287743f1f01 *tests/testthat/test-lavaan_multigroup.R
 53a800845bb1828acd22678b5d5e35d7 *tests/testthat/test-missing_samplesizes.R
 8f04ded4b71b6662591878354a315ad5 *tests/testthat/test-new_seeds.R
-67719c36e156b5b2e75caaca58954d00 *tests/testthat/test-other_fraction.R
+e732601aeee44077543a3ff44dddb89c *tests/testthat/test-other_fraction.R
 2c397c5aac6abaecb0fedc9293e7b32e *tests/testthat/test-parser.R
 f7f17474dc62d94182bdf82a1625dd95 *tests/testthat/test-parser2.R
 7bf31387ed399dd7ccf7733ed3640589 *tests/testthat/test-regression.R
-718ab06c8c9f178ccd6eef78e960776d *tests/testthat/test-summary.R
-27b6dc501ec0243ecc2523abd84e65f2 *tests/testthat/test-ttest.R
+a57f94b5bb2f96a37d3f467ab74f6c1c *tests/testthat/test-summary.R
+a4295fcd2d427088e5c019466a6837ae *tests/testthat/test-ttest.R
 e2a19379753602d0d508e09e82ce5441 *tests/testthat/test2-J.R
-92ffd16424fe53ceef492073de45b7df *vignettes/Introduction_to_bain.Rmd
+92ee7b4f17fa859b3af2c2f927d59566 *vignettes/Introduction_to_bain.Rmd

@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
 #  x<-sesamesim$postnumb[which(sesamesim$sex==1)]
 #  y<-sesamesim$postnumb[which(sesamesim$sex==2)]
 #  # execute student's t-test
-#  ttest <- t_test(x,y,paired = FALSE, var.equal = TRUE)
+#  ttest <- t_test(x,y, var.equal = TRUE)
 #  # set a seed value
 #  set.seed(100)
 #  # test hypotheses with bain. The names of the means are x and y.
@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 #  x<-sesamesim$postnumb[which(sesamesim$sex==1)]
 #  y<-sesamesim$postnumb[which(sesamesim$sex==2)]
 #  # execute student's t-test
-#  ttest <- t_test(x,y,paired = FALSE, var.equal = FALSE)
+#  ttest <- t_test(x,y, var.equal = FALSE)
 #  # set a seed value
 #  set.seed(100)
 #  # test hypotheses with bain. The names of the means are x and y.
@@ -76,7 +76,7 @@ knitr::opts_chunk$set(
 #  x<-sesamesim$postnumb[which(sesamesim$sex==1)]
 #  y<-sesamesim$postnumb[which(sesamesim$sex==2)]
 #  # execute student's t-test
-#  ttest <- t_test(x,y,paired = FALSE, var.equal = TRUE)
+#  ttest <- t_test(x,y, var.equal = TRUE)
 #  # compute the pooled within standard deviation using the variance of x
 #  # (ttest$v[1]) and y (ttest$v[2])
 #  pwsd <- sqrt(((length(x) -1) * ttest$v[1] + (length(y)-1) * ttest$v[2])/

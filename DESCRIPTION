@@ -1,7 +1,7 @@
 Package: bain
 Type: Package
 Title: Bayes Factors for Informative Hypotheses
-Version: 0.2.9
+Version: 0.2.10
 Authors@R: c(
     person(c("Xin"), "Gu", role = c("aut"), email = "guxin57@hotmail.com"),
     person(c("Herbert"), "Hoijtink", role = c("aut"), email = "h.hoijtink@uu.nl"),
@@ -31,7 +31,7 @@ Depends: R (>= 3.0.0), stats
 Imports: lavaan
 Suggests: MASS, testthat, knitr, rmarkdown
 VignetteBuilder: knitr
-Packaged: 2023-09-06 11:49:17 UTC; vanlissa
+Packaged: 2023-09-27 08:53:51 UTC; vanlissa
 Author: Xin Gu [aut],
   Herbert Hoijtink [aut],
   Joris Mulder [aut],
@@ -41,4 +41,4 @@ Author: Xin Gu [aut],
   Niels Waller [ctb]
 Maintainer: Caspar J van Lissa <c.j.vanlissa@tilburguniversity.edu>
 Repository: CRAN
-Date/Publication: 2023-09-06 15:20:07 UTC
+Date/Publication: 2023-09-27 09:40:03 UTC

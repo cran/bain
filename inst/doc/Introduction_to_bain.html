@@ -12,7 +12,7 @@
 
 <meta name="author" content="Herbert Hoijtink, Caspar van Lissa, Joris Mulder, Xin Gu" />
 
-<meta name="date" content="2023-09-06" />
+<meta name="date" content="2023-09-27" />
 
 <title>Introduction to bain</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Introduction to bain</h1>
 <h4 class="author">Herbert Hoijtink, Caspar van Lissa, Joris Mulder, Xin
 Gu</h4>
-<h4 class="date">2023-09-06</h4>
+<h4 class="date">2023-09-27</h4>
 
 
 
@@ -953,7 +953,7 @@ variances):</li>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>x<span class="ot">&lt;-</span>sesamesim<span class="sc">$</span>postnumb[<span class="fu">which</span>(sesamesim<span class="sc">$</span>sex<span class="sc">==</span><span class="dv">1</span>)]</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>y<span class="ot">&lt;-</span>sesamesim<span class="sc">$</span>postnumb[<span class="fu">which</span>(sesamesim<span class="sc">$</span>sex<span class="sc">==</span><span class="dv">2</span>)]</span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co"># execute student&#39;s t-test</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>ttest <span class="ot">&lt;-</span> <span class="fu">t_test</span>(x,y,<span class="at">paired =</span> <span class="cn">FALSE</span>, <span class="at">var.equal =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>ttest <span class="ot">&lt;-</span> <span class="fu">t_test</span>(x,y, <span class="at">var.equal =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># set a seed value</span></span>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
 <span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># test hypotheses with bain. The names of the means are x and y.</span></span>
@@ -973,7 +973,7 @@ variances):</li>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>x<span class="ot">&lt;-</span>sesamesim<span class="sc">$</span>postnumb[<span class="fu">which</span>(sesamesim<span class="sc">$</span>sex<span class="sc">==</span><span class="dv">1</span>)]</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>y<span class="ot">&lt;-</span>sesamesim<span class="sc">$</span>postnumb[<span class="fu">which</span>(sesamesim<span class="sc">$</span>sex<span class="sc">==</span><span class="dv">2</span>)]</span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># execute student&#39;s t-test</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>ttest <span class="ot">&lt;-</span> <span class="fu">t_test</span>(x,y,<span class="at">paired =</span> <span class="cn">FALSE</span>, <span class="at">var.equal =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>ttest <span class="ot">&lt;-</span> <span class="fu">t_test</span>(x,y, <span class="at">var.equal =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># set a seed value</span></span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># test hypotheses with bain. The names of the means are x and y.</span></span>
@@ -1022,7 +1022,7 @@ variances):</li>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>x<span class="ot">&lt;-</span>sesamesim<span class="sc">$</span>postnumb[<span class="fu">which</span>(sesamesim<span class="sc">$</span>sex<span class="sc">==</span><span class="dv">1</span>)]</span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>y<span class="ot">&lt;-</span>sesamesim<span class="sc">$</span>postnumb[<span class="fu">which</span>(sesamesim<span class="sc">$</span>sex<span class="sc">==</span><span class="dv">2</span>)]</span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># execute student&#39;s t-test</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>ttest <span class="ot">&lt;-</span> <span class="fu">t_test</span>(x,y,<span class="at">paired =</span> <span class="cn">FALSE</span>, <span class="at">var.equal =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>ttest <span class="ot">&lt;-</span> <span class="fu">t_test</span>(x,y, <span class="at">var.equal =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># compute the pooled within standard deviation using the variance of x</span></span>
 <span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co"># (ttest$v[1]) and y (ttest$v[2])</span></span>
 <span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>pwsd <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(((<span class="fu">length</span>(x) <span class="sc">-</span><span class="dv">1</span>) <span class="sc">*</span> ttest<span class="sc">$</span>v[<span class="dv">1</span>] <span class="sc">+</span> (<span class="fu">length</span>(y)<span class="sc">-</span><span class="dv">1</span>) <span class="sc">*</span> ttest<span class="sc">$</span>v[<span class="dv">2</span>])<span class="sc">/</span></span>
