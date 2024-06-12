@@ -766,18 +766,18 @@ knitr::opts_chunk$set(
 #  # obtain the descriptives table
 #  summary(results, ci = 0.95)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  library(bain)
 #  library(lavaan)
 #  model1 <- 'A =~ Ab + Al + Af + An + Ar + Ac
 #             B =~ Bb + Bl + Bf + Bn + Br + Bc'
 #  fit1 <- sem(model1, data = sesamesim, std.lv = TRUE)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  hypotheses <- "(Ab, Al, Af, An, Ar, Ac) >.6 &
 #                 (Bb, Bl, Bf, Bn, Br, Bc) >.6"
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  # Extract standardized parameter estimates (argument x)
 #  PE1 <- parameterEstimates(fit1, standardized = TRUE)
 #  # Identify which parameter estimates are factor loadings
@@ -809,7 +809,7 @@ knitr::opts_chunk$set(
 #  # SEM hypotheses:
 #  joint_parameters <- 0
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  res <- bain(x = estimates,
 #              hypothesis = hypotheses,
 #              n = n,
@@ -818,7 +818,7 @@ knitr::opts_chunk$set(
 #              joint_parameters = joint_parameters)
 #  res
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  sres <- summary(res, ci = 0.95)
 #  sres
 

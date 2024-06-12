@@ -43,7 +43,7 @@
 #'
 #' Hoijtink, H., Mulder, J., van Lissa, C., & Gu, X. (2019). A tutorial on
 #' testing hypotheses using the Bayes factor. *Psychological methods, 24*(5),
-#' 539. \doi{10.31234/osf.io/v3shc}
+#' 539. \doi{10.1037/met0000201}
 #'
 #' For applications in structural equation modeling, see:
 #'
@@ -722,8 +722,14 @@ evaluated, OR, one of your hypotheses is impossible. See the vignette
 # an extra row and column to the bain output object.
 
   if (Bainres$gocomplement == TRUE){
-  Bainres <- PMPcomplement(results = Bainres)}
-
+    Bainres <- tryCatch({
+      Argslist <- list(results = Bainres)
+      do.call(PMPcomplement, Argslist)
+    },
+    error = function(e){
+      return(Bainres)
+    })
+  }
   class(Bainres) <- "bain"
   Bainres
 }
